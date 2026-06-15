@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "scripts": {
+    "workflow:typecheck": "tsc -p tsconfig.workflow-automation.json --noEmit",
+    "validate-headers": "tsx scripts/validate-headers.ts",
+    "workflow:test": "vitest run src/__tests__/task-workflow-integrity.test.ts src/__tests__/sync-task-index.test.ts",
+    "task:sync": "tsx scripts/sync-task-index.ts",
+    "rename-done-tasks": "tsx scripts/rename-done-tasks.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "glob": "^11.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0",
+    "vitest": "^4.0.6"
+  }
+}

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<!--
+  Lesson 1 — published page.
+  Prose source of truth is article.md; this file is the rendered lesson that embeds
+  the figures via <iframe>. When article.md changes, update the prose here too.
+  Each figure also opens standalone (figures/*.html) for isolated testing.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Understanding Vector Landscapes — Lesson 1</title>
+<style>
+  :root{ --bg:#141414; --panel:#1c1c1c; --text:#cfcfcf; --head:#e8e8e8; --muted:#8a8a8a; --line:#2a2a2a; --accent:#54739e; }
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;font-size:17px;}
+  .wrap{max-width:720px;margin:0 auto;padding:40px 20px 80px;}
+  h1{font-weight:600;font-size:30px;color:var(--head);margin:0 0 6px;line-height:1.25;}
+  .lede{color:var(--muted);font-size:15px;margin:0 0 32px;}
+  h2{font-weight:600;font-size:22px;color:var(--head);margin:44px 0 10px;}
+  h3{font-weight:600;font-size:18px;color:var(--head);margin:32px 0 8px;}
+  p{margin:0 0 16px;}
+  em{color:#e8e8e8;font-style:italic;}
+  ul{margin:0 0 16px;padding-left:22px;}
+  li{margin:0 0 8px;}
+  hr{border:none;border-top:1px solid var(--line);margin:40px 0;}
+  /* figure embed */
+  figure{margin:36px 0;}
+  figure iframe{width:100%;height:600px;border:1px solid var(--line);border-radius:10px;
+    background:var(--panel);display:block;}
+  figcaption{color:var(--muted);font-size:13px;margin-top:8px;display:flex;
+    justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  figcaption a{color:var(--accent);text-decoration:none;}
+  figcaption a:hover{text-decoration:underline;}
+  @media (max-width:600px){ figure iframe{height:460px;} body{font-size:16px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Understanding Vector Landscapes — Lesson 1</h1>
+  <p class="lede">The pinball-machine model of a language model — and what stays fixed when everything else is random.</p>
+
+  <h2>The pinball-machine model</h2>
+  <p>A language model can be pictured as a pinball machine. The picture is a simplification — the real system has thousands of dimensions, and its inner workings can be read only partially, even with specialized tools — but the shape it gives is faithful, and it makes everything that follows easier to see. So before the examples, here is the machine, part by part.</p>
+
+  <h3>The board is fixed</h3>
+  <p>Training builds the board: a vast, frozen landscape studded with springs. This is the "vector landscape" the series is named for. Once training ends, the board does not change. It is identical from one prompt to the next and from one user to the next. Nothing about running the model alters its shape — every interaction plays out on the same surface.</p>
+
+  <h3>The plunger is the prompt</h3>
+  <p>The prompt is the plunger that puts the ball in motion. But it does two jobs at once. It launches the ball, and it also decides <em>which part of the board is live</em> — which springs are reachable and which sit walled off for this particular run. A prompt is therefore not just an amount of energy; it is a choice of terrain. The same machine, launched two different ways, can behave as though it were two different boards.</p>
+
+  <h3>The ball rewrites its own launch</h3>
+  <p>A pinball is normally launched once and then runs free. This ball is stranger. The model generates its output one small piece at a time — roughly a fraction of a word per step, called a <em>token</em> — and each piece, once produced, is fed back in as part of the next launch. So the ball relaunches itself hundreds of times in a single answer, each launch starting from wherever the last one left it. The output is not read off one resting place; it is a path the ball builds underneath itself as it travels.</p>
+
+  <h3>The board is studded with springs</h3>
+  <p>The board is not a smooth surface that merely steers a rolling ball. It is covered in springs — kickers that sit quiet until the ball reaches their zone, then push. Each spring corresponds to a concept, a tone, or a behavior, and most of them stay dormant on any given run. Context decides which the ball reaches and which it never touches. The word "bank" lands the ball among the money springs beside "deposit," and among the riverside springs beside "current"; the unused springs are not overruled, they are simply never struck. Interpretability researchers have found that some of these springs behave like emotions — a "desperate" or "loving" kicker that fires in the situations one would expect, and that measurably bends the ball's path when it does. An emotion, in this picture, is not a decoration on the output; it is a spring in the board.</p>
+
+  <h3>The springs set the odds; the die makes the pick</h3>
+  <p>It is tempting to imagine the randomness living in the springs — as though each kick varied in strength from run to run. It does not. Every spring's push is set by the context and computed exactly: the same situation produces the same kicks every time. That entire stage is deterministic.</p>
+  <p>The randomness enters at a single point. On each step, all the live springs fire, and their combined push does not point at one exit — it produces a <em>spread</em> of likely next positions. Only then does one die roll select a single position out of that spread. The springs set the odds; the die makes the pick.</p>
+  <p>This also means the die can be switched off. Its weight is a setting (called <em>temperature</em>); lowered to zero, the machine stops rolling altogether and takes the single strongest push at every step. The same prompt then yields the identical result every time — which is proof that the springs are the computation and the die is only an optional coin flip bolted onto the output.</p>
+
+  <figure>
+    <iframe src="figures/springs-and-die-3d.html" loading="lazy" title="3D vector landscape: springs produce a spread, the die picks one position"></iframe>
+    <figcaption>
+      <span>The springs produce a spread; the die picks one position out of it. (Temperature control in progress.)</span>
+      <a href="figures/springs-and-die-3d.html" target="_blank" rel="noopener">Open figure ↗</a>
+    </figcaption>
+  </figure>
+
+  <p>A compact map of the metaphor:</p>
+  <ul>
+    <li>The board, studded with springs — the trained weights: a fixed landscape of mostly-dormant kickers.</li>
+    <li>The plunger — the prompt, which both launches the ball and selects which region of the board is live.</li>
+    <li>A spring firing as the ball arrives — an internal representation activating in context.</li>
+    <li>The die, rolled once per step — the sampling that picks the next position out of the spread the springs produce.</li>
+    <li>Where the ball comes to rest — the generated text.</li>
+  </ul>
+
+  <h3>Entropy is how narrow the live region is</h3>
+  <p>How predictable an answer is depends on how the live springs share the push. A sharply specified prompt leaves one direction overwhelmingly strongest — "the capital of France is" points almost entirely at <em>Paris</em>, the spread collapses to a point, and the die has nothing left to decide. An open-ended prompt lets many springs contribute comparable pushes, so the spread stays wide and the die has real room to choose. Watching how quickly that spread narrows, as each generated token re-tilts the board, is most of what it means to read the machine.</p>
+
+  <h3>The terrain is what survives the re-roll</h3>
+  <p>This is the idea the examples are built to show. Because of the die, running one prompt twice produces two different paths. But the <em>board</em> is the same both times, and its true shape is revealed by what stays constant across the re-rolls. Surface details diverge; the same springs fire again and again. Randomness is what makes the machine non-deterministic; the terrain is what makes its output recognizably the same shape regardless. One sample shows where the ball happened to land. Only the invariants across many samples show the landscape underneath.</p>
+  <p>The two examples that follow run the identical prompt — <em>a surreal story about guilt</em> — twice. Reading them side by side, the divergences are the dice; the repetitions are the terrain.</p>
+
+  <figure>
+    <iframe src="figures/terrain-vs-dice.html" loading="lazy" title="The same prompt run twice: divergent paths over the same fixed board"></iframe>
+    <figcaption>
+      <span>Same prompt, two runs. The ◎ nodes both runs pass through are the terrain; the divergence is the dice.</span>
+      <a href="figures/terrain-vs-dice.html" target="_blank" rel="noopener">Open figure ↗</a>
+    </figcaption>
+  </figure>
+
+  <hr>
+  <p class="lede">Lesson 1 of the Vector Landscapes series. Prose source: <code>article.md</code> · figure map: <code>FIGURES.md</code>.</p>
+
+</div>
+</body>
+</html>

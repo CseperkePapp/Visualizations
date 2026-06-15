@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vector Landscape — Lesson 1</title>
+<style>
+  html,body{margin:0;background:#1c1c1c;color:#cfcfcf;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1040px;margin:0 auto;padding:22px 16px 40px;}
+  h1{font-weight:500;font-size:20px;color:#e8e8e8;margin:0 0 4px;}
+  p.sub{margin:0 0 14px;color:#8a8a8a;font-size:14px;}
+  .stage{position:relative;width:100%;background:#1c1c1c;border-radius:10px;overflow:hidden;}
+  canvas{display:block;width:100%;cursor:crosshair;}
+  .controls{display:flex;gap:8px;align-items:center;margin-top:14px;flex-wrap:wrap;}
+  button{background:#2a2a2a;color:#dcdcdc;border:1px solid #3a3a3a;border-radius:8px;padding:8px 13px;font-size:14px;cursor:pointer;}
+  button:hover{background:#333;}
+  button.on{background:#3a4a63;border-color:#54739e;color:#eaf1ff;}
+  .hint{color:#6f6f6f;font-size:13px;margin-left:6px;}
+  .controls label.temp{display:flex;align-items:center;gap:6px;color:#cfcfcf;font-size:13px;}
+  .controls input[type=range]{width:90px;accent-color:#54739e;cursor:pointer;}
+  .controls #tempVal{color:#9fb6d6;min-width:30px;font-variant-numeric:tabular-nums;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The vector landscape</h1>
+  <p class="sub">A fixed field of dormant words. The prompt launches a ball; each word it picks lights up and the sentence is born. Two versions, same terrain — watch the ◎ nodes both runs pass through. Hover the field to surface dormant words.</p>
+  <div class="stage"><canvas id="c"></canvas></div>
+  <div class="controls">
+    <button id="v1" class="on">Version 1 · moth</button>
+    <button id="v2">Version 2 · door</button>
+    <button id="replay">Replay</button>
+    <button id="pause">Pause</button>
+    <label class="temp" title="Temperature: how many roads-not-taken light up before the die picks">🌡<input id="temp" type="range" min="0" max="1.5" step="0.01" value="0.7"><span id="tempVal">0.70</span></label>
+    <span class="hint">lit = chosen · grey = possible · ◎ = both versions pass here</span>
+  </div>
+</div>
+<script>
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+let W=0,H=0,midY=0,DPR=Math.min(window.devicePixelRatio||1,2);
+let mx=-999,my=-999;
+
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function hexA(hex,a){const n=parseInt(hex.slice(1),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+function mixHex(a,b,t){
+  const ah=parseInt(a.slice(1),16),bh=parseInt(b.slice(1),16);
+  const ar=ah>>16&255,ag=ah>>8&255,ab=ah&255;
+  const br=bh>>16&255,bg=bh>>8&255,bb=bh&255;
+  const rr=Math.round(lerp(ar,br,t)),rg=Math.round(lerp(ag,bg,t)),rb=Math.round(lerp(ab,bb,t));
+  return `#${((1<<24)+(rr<<16)+(rg<<8)+rb).toString(16).slice(1)}`;
+}
+function ease(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return v<a?a:v>b?b:v;}
+function smooth01(x){x=x<0?0:x>1?1:x;return x*x*(3-2*x);}
+function nodeColor(s){return s.color==='#9a9a9a'?'#cfcfcf':s.color;}
+function mutedColor(hex,amt=0.42){return mixHex(hex,'#8d8d8d',amt);}
+
+const AMBER='#F2A33C',MAGENTA='#E85AA6',TEAL='#28BBA6',VIOLET='#9B8BF0',BLUE='#3E8EE0',PINK='#E0728F';
+
+// invented "roads not taken" — varied colours, surfaced as ghost options at higher temperature
+const GHOST_POOL=[
+  {w:'ocean',c:'#3FA9C9'},{w:'machine',c:'#C98A3F'},{w:'garden',c:'#6FBF73'},{w:'fire',c:'#E2603B'},
+  {w:'music',c:'#B07FE0'},{w:'mother',c:'#E08CA8'},{w:'map',c:'#7FA8D0'},{w:'glass',c:'#7FD0C0'},
+  {w:'storm',c:'#5B8FB0'},{w:'letter',c:'#D0B07F'},{w:'animal',c:'#C9B23F'},{w:'mirror',c:'#A8C0C9'},
+  {w:'clock',c:'#3E8EE0'},{w:'river',c:'#49B6C0'},{w:'thread',c:'#9B8BF0'},{w:'ash',c:'#B79B86'}
+];
+
+// shared deep-basin nodes both versions pass through (fixed world X)
+const guilt={x:250,y0:-0.10,word:'guilt',color:AMBER,shared:true,fork:true,neigh:['shame','regret']};
+const feed ={x:1150,y0:0.12,word:'feed',color:TEAL,shared:true,neigh:['starve','keep']};
+const self ={x:1750,y0:-0.12,word:'self',color:VIOLET,shared:true,fork:true,neigh:['other','mask']};
+
+const runs={
+  1:[ guilt,
+      {x:500,y0:0.16,word:'socks',color:MAGENTA,frag:'sat folding my socks,',neigh:['shoes','hands']},
+      {x:850,y0:-0.16,word:'tax form',color:'#9a9a9a',frag:'patient as a tax form,',neigh:['ledger','letter']},
+      feed,
+      {x:1450,y0:0.18,word:'year',color:BLUE,frag:'the year,',neigh:['month','hour']},
+      self,
+      {x:2050,y0:0.14,word:'moth',color:PINK,frag:'and left as a moth',neigh:['bird','dust']},
+      {x:2350,y0:-0.10,word:'window',color:'#9a9a9a',frag:'for your window.',neigh:['door','sky']} ],
+  2:[ guilt,
+      {x:480,y0:-0.16,word:'door',color:MAGENTA,frag:'opened a grey door,',neigh:['wall','crack']},
+      {x:820,y0:0.16,word:'wife',color:'#9a9a9a',frag:'the house ate around it,',neigh:['table','room']},
+      feed,
+      {x:1450,y0:-0.16,word:'bread',color:'#9a9a9a',frag:'bread and the truth,',neigh:['crumbs','milk']},
+      self,
+      {x:2050,y0:-0.14,word:'far side',color:PINK,frag:'on the far side',neigh:['mirror','threshold']},
+      {x:2350,y0:0.12,word:'fed',color:AMBER,frag:'as the thing to be fed.',neigh:['gone','kept']} ]
+};
+const sentence={
+  1:['On the third day, Guilt','was sitting at the foot of the bed, folding my socks,','patient as a tax form.','It fed on','the year,','wore my hands,','and slipped out as a moth','toward your window.'],
+  2:['The lie','cracked a grey door in the wall,','and the house ate around it.','I fed it','bread and the truth,','until I woke','on the far side —','the thing now to be fed.']
+};
+
+const vocabPool=['memory','river','clock','mother','ash','salt','letter','tide','stone','sleep','mirror','hunger','shadow','threshold','quiet','dust','wall','debt','sorry','breath','rust','hollow','tide','cold','name','window','door','years','hands','milk','smoke','glass','thread','silence','weight','open','closed','small','grey','warm'];
+let dormant=[];
+
+let run=1,steps=[],phases=[],total=0,temp=0.7;
+const T_intro=1.4,T_travel=1.7,T_stop=2.0,T_fork=2.9,T_final=3.6,T_gap=1.8;
+
+function buildField(){
+  dormant=[];const r=rng(99);
+  for(let i=0;i<70;i++){
+    dormant.push({wx:80+r()*2400,wy:(r()-0.5)*0.9,word:vocabPool[Math.floor(r()*vocabPool.length)],ph:r()*6.28});
+  }
+}
+function buildSchedule(){
+  steps=runs[run];phases=[];let t=0;
+  phases.push({kind:'intro',t0:0,t1:T_intro,cap:'A vast field of dormant words — almost all unused.'});t=T_intro;
+  for(let i=0;i<steps.length;i++){
+    const s=steps[i],isFinal=i===steps.length-1;
+    phases.push({kind:'travel',idx:i,t0:t,t1:t+T_travel});t+=T_travel;
+    s._tFull=t;
+    const dur=isFinal?T_final:(s.fork?T_fork:T_stop);
+    phases.push({kind:'stop',idx:i,final:isFinal,t0:t,t1:t+dur,cap:capFor(i,s,isFinal)});t+=dur;
+  }
+  total=t+T_gap;
+}
+function capFor(i,s,isFinal){
+  if(i===0)return 'A node fires. The die tumbles, then settles — the opening could go many ways.';
+  if(s.shared&&s.word==='feed')return 'Both versions hit “feed” — a deep basin the terrain pulls toward.';
+  if(s.shared&&s.word==='self')return 'The fork: identity dissolves. Same terrain, the dice send each version its own way.';
+  if(isFinal)return 'Where the ball rests is the finished sentence.';
+  return 'Springs set the odds; the die makes the pick; the word is fed back in.';
+}
+
+function resize(){
+  const stage=canvas.parentElement;
+  W=stage.clientWidth;H=Math.round(W*9/16);midY=H*0.52;
+  canvas.width=W*DPR;canvas.height=H*DPR;canvas.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  buildField();buildSchedule();
+}
+
+let camFocus=0;
+function project(wx,wyFrac){
+  const d=wx-camFocus;const s=clamp(1-Math.abs(d)/1700,0.34,1);
+  return{sx:W*0.40+d*0.95*s,sy:midY+wyFrac*H*0.42*s,s,a:clamp(s*1.25-0.1,0,1)};
+}
+function nodeWorld(s){return {wx:s.x,wy:s.y0};}
+
+function drawArrow(x,y,ang,len,color,w,head){
+  const dx=Math.cos(ang)*len,dy=Math.sin(ang)*len;
+  ctx.strokeStyle=color;ctx.lineWidth=w;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+dx,y+dy);ctx.stroke();
+  if(head){const hx=x+dx,hy=y+dy;ctx.beginPath();
+    ctx.moveTo(hx,hy);ctx.lineTo(hx-Math.cos(ang-0.4)*head,hy-Math.sin(ang-0.4)*head);
+    ctx.moveTo(hx,hy);ctx.lineTo(hx-Math.cos(ang+0.4)*head,hy-Math.sin(ang+0.4)*head);ctx.stroke();}
+}
+function glow(x,y,radius,color,alpha){
+  if(radius<=0)return;const g=ctx.createRadialGradient(x,y,0,x,y,radius);
+  g.addColorStop(0,color);g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.globalAlpha=alpha;ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,radius,0,7);ctx.fill();ctx.globalAlpha=1;
+}
+function drawDormant(t){
+  for(const d of dormant){
+    const p=project(d.wx,d.wy);if(p.a<=0.04)continue;
+    const px=p.sx,py=p.sy;
+    const near=Math.hypot(px-mx,py-my)<46;
+    const base=0.16+Math.sin(t*1.0+d.ph)*0.03;
+    const al=(near?0.8:base)*p.a;
+    ctx.globalAlpha=al;ctx.fillStyle=near?'#d8d8d8':'#8c8c8c';
+    ctx.font=`${Math.round(13*p.s)}px Georgia,serif`;ctx.textAlign='center';
+    ctx.fillText(d.word,px,py);
+    ctx.globalAlpha=0.5*p.a;ctx.fillStyle='#5a5a5a';
+    ctx.beginPath();ctx.arc(px,py+10*p.s,1.8*p.s,0,7);ctx.fill();
+  }
+  ctx.globalAlpha=1;ctx.textAlign='start';
+}
+function drawPath(struck,ballScreen){
+  const pts=[];
+  for(let i=0;i<=struck&&i<steps.length;i++){const w=nodeWorld(steps[i]);const p=project(w.wx,w.wy);pts.push({p,c:steps[i].color});}
+  if(ballScreen)pts.push({p:{sx:ballScreen.x,sy:ballScreen.y},c:'#ffffff'});
+  if(pts.length<2)return;
+  ctx.lineWidth=2.6;ctx.lineCap='round';ctx.lineJoin='round';
+  for(let i=0;i<pts.length-1;i++){ctx.strokeStyle=hexA(pts[i+1].c==='#ffffff'?'#bbbbbb':pts[i+1].c,0.5*pts[i].p.a);
+    ctx.beginPath();ctx.moveTo(pts[i].p.sx,pts[i].p.sy);ctx.lineTo(pts[i+1].p.sx,pts[i+1].p.sy);ctx.stroke();}
+}
+function drawNode(s,g,t){
+  const w=nodeWorld(s);const p=project(w.wx,w.wy);if(p.a<=0.03)return p;
+  const col=nodeColor(s);
+  if(g>0){const pulse=1+Math.sin(t*3)*0.06*g;glow(p.sx,p.sy,34*p.s*pulse,hexA(col,0.5*g*p.a),1);
+    ctx.fillStyle=hexA(col,0.95*g*p.a);ctx.beginPath();ctx.arc(p.sx,p.sy,6.5*p.s,0,7);ctx.fill();}
+  else{ctx.fillStyle=hexA('#666666',0.6*p.a);ctx.beginPath();ctx.arc(p.sx,p.sy,3*p.s,0,7);ctx.fill();}
+  if(s.shared){ctx.strokeStyle=hexA('#dcdcdc',(g>0?0.7:0.35)*p.a);ctx.lineWidth=1.3;
+    ctx.beginPath();ctx.arc(p.sx,p.sy,11*p.s,0,7);ctx.stroke();}
+  // word label
+  if(g>0.15){ctx.globalAlpha=g*p.a;ctx.fillStyle=col;ctx.font=`${Math.round(16*p.s)}px Georgia,serif`;ctx.textAlign='center';
+    ctx.fillText(s.word,p.sx,p.sy-15*p.s);ctx.globalAlpha=1;ctx.textAlign='start';}
+  return p;
+}
+function drawDie(cx,cy,s,face){
+  face=clamp(face|0,1,6);
+  ctx.save();ctx.shadowColor='rgba(255,255,255,0.5)';ctx.shadowBlur=12;ctx.fillStyle='#f4f4f4';
+  const r=s*0.22;
+  ctx.beginPath();ctx.moveTo(cx-s/2+r,cy-s/2);
+  ctx.arcTo(cx+s/2,cy-s/2,cx+s/2,cy+s/2,r);ctx.arcTo(cx+s/2,cy+s/2,cx-s/2,cy+s/2,r);
+  ctx.arcTo(cx-s/2,cy+s/2,cx-s/2,cy-s/2,r);ctx.arcTo(cx-s/2,cy-s/2,cx+s/2,cy-s/2,r);ctx.fill();ctx.restore();
+  ctx.fillStyle='#1c1c1c';const o=s*0.27,pp=s*0.1;
+  const pip=(x,y)=>{ctx.beginPath();ctx.arc(cx+x,cy+y,pp,0,7);ctx.fill();};
+  const F={1:[[0,0]],2:[[-o,-o],[o,o]],3:[[-o,-o],[0,0],[o,o]],4:[[-o,-o],[o,-o],[-o,o],[o,o]],5:[[-o,-o],[o,-o],[0,0],[-o,o],[o,o]],6:[[-o,-o],[o,-o],[-o,0],[o,0],[-o,o],[o,o]]};
+  for(const v of F[face])pip(v[0],v[1]);
+}
+function decisionOptions(idx){
+  const s=steps[idx],chosenWord=steps[idx+1]?.word;
+  const opts=[];
+  if(chosenWord)opts.push({word:chosenWord,color:nodeColor(steps[idx+1]),chosen:true});
+  // alternatives: curated neighbours first, then invented ghosts — count scales with temperature
+  const nAlts=Math.round((temp/1.5)*5);
+  const pool=[];
+  (s.neigh||[]).forEach((w,i)=>{if(w!==chosenWord)pool.push({word:w,color:GHOST_POOL[(idx*2+i)%GHOST_POOL.length].c});});
+  const startG=idx*3+(run===1?0:7);
+  for(let k=0;k<GHOST_POOL.length;k++){const g=GHOST_POOL[(startG+k)%GHOST_POOL.length];
+    if(g.w!==chosenWord&&!pool.some(o=>o.word===g.w))pool.push({word:g.w,color:g.c});}
+  for(let k=0;k<nAlts&&k<pool.length;k++)opts.push({word:pool[k].word,color:pool[k].color,chosen:false});
+  return opts;
+}
+function hashWord(w){let h=0;for(let i=0;i<w.length;i++)h=(h*31+w.charCodeAt(i))|0;return Math.abs(h);}
+function drawDecisionFan(p,baseAng,idx,progress,chosenLen){
+  const opts=decisionOptions(idx);if(!opts.length)return;
+  const heat=temp/1.5;
+  // grey -> colour -> grey envelope across the stop
+  const lit=Math.min(smooth01(progress/0.25),1-smooth01((progress-0.7)/0.3));
+  const alts=opts.length-1, spread=0.5+0.35*heat;
+  ctx.textAlign='center';
+  opts.forEach((opt,i)=>{
+    const chosen=opt.chosen;
+    const ang=chosen?baseAng:baseAng+(alts===1?spread*0.8:(-spread+2*spread*((i)/(alts+1))));
+    // chosen arrow spans the ACTUAL distance to the next node; alternatives vary by word
+    const len=chosen?Math.max(20*p.s,(chosenLen||60*p.s)-9*p.s):(38+(hashWord(opt.word)%5)*11)*p.s;
+    const tone=chosen?opt.color:mixHex('#8a8a8a',opt.color,lit);   // grey -> colour -> grey
+    const alpha=(chosen?0.96:0.7*lit)*p.a;
+    drawArrow(p.sx,p.sy,ang,len,hexA(tone,alpha),chosen?2.5:1.6,chosen?8:6);
+    if(chosen)return;                                   // the node shows the chosen word itself
+    const tx=p.sx+Math.cos(ang)*(len+16*p.s),ty=p.sy+Math.sin(ang)*(len+16*p.s);
+    ctx.globalAlpha=0.85*lit*p.a;
+    ctx.fillStyle=mixHex('#8f8f8f',opt.color,lit);
+    ctx.font=`${Math.round(12*p.s)}px Georgia,serif`;
+    ctx.fillText(opt.word,tx,ty);
+  });
+  ctx.globalAlpha=1;ctx.textAlign='start';
+}
+function drawBall(x,y,r,col){
+  col=col||'#cfd4da';
+  const g=ctx.createRadialGradient(x-r*0.35,y-r*0.4,1,x,y,r);
+  g.addColorStop(0,'#ffffff');g.addColorStop(0.4,col);g.addColorStop(1,mixHex(col,'#1c1c1c',0.55));
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.85)';ctx.beginPath();ctx.arc(x-r*0.35,y-r*0.4,r*0.22,0,7);ctx.fill();
+}
+function drawSentence(struck){
+  ctx.fillStyle='rgba(20,20,20,0.6)';ctx.fillRect(0,0,W,56);
+  ctx.textAlign='center';ctx.font='12px -apple-system,Segoe UI,Roboto,sans-serif';ctx.fillStyle='#7c7c7c';
+  ctx.fillText('the sentence being born — version '+run,W/2,18);
+  const arr=sentence[run]||[];let segs=[];
+  for(let i=0;i<=struck&&i<arr.length;i++){const col=steps[i].color==='#9a9a9a'?'#cfcfcf':steps[i].color;segs.push({txt:arr[i],col,last:i===struck});}
+  if(!segs.length){return;}
+  ctx.font='500 17px Georgia,serif';const sp=ctx.measureText(' ').width;
+  const measure=()=>segs.reduce((a,s)=>a+ctx.measureText(s.txt).width+sp,0);
+  while(measure()>W-24&&segs.length>1)segs.shift();
+  let tw=measure();let x=clamp(W/2-tw/2,12,W);ctx.textAlign='left';
+  for(const s of segs){const w=ctx.measureText(s.txt).width;ctx.fillStyle=hexA(s.col[0]==='#'?s.col:'#cfcfcf',s.last?1:0.72);ctx.fillText(s.txt,x,42);x+=w+sp;}
+  ctx.textAlign='start';
+}
+function drawCaption(text,alpha){
+  ctx.fillStyle='rgba(20,20,20,0.5)';ctx.fillRect(0,H-40,W,40);
+  ctx.globalAlpha=alpha;ctx.fillStyle='#c4c4c4';ctx.font='15px -apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.textAlign='center';ctx.fillText(text,W/2,H-15);ctx.globalAlpha=1;ctx.textAlign='start';
+}
+
+let start=performance.now(),paused=false,pauseT=0;
+function phaseAt(t){for(const p of phases)if(t>=p.t0&&t<p.t1)return p;return phases[phases.length-1];}
+
+function frame(now){
+  let t=(now-start)/1000;if(t>total)t=t%total;
+  const p=phaseAt(t);
+
+  // ball world pos + camera
+  let ballW,struck=-1;
+  if(p.kind==='intro'){ballW=nodeWorld(steps[0]);}
+  else if(p.kind==='travel'){const a=ease((t-p.t0)/(p.t1-p.t0));
+    const from=p.idx===0?{wx:steps[0].x-260,wy:steps[0].y0}:nodeWorld(steps[p.idx-1]);
+    const to=nodeWorld(steps[p.idx]);ballW={wx:lerp(from.wx,to.wx,a),wy:lerp(from.wy,to.wy,a)};struck=p.idx-1;}
+  else{ballW=nodeWorld(steps[p.idx]);struck=p.idx;}
+  camFocus+=(ballW.wx-camFocus)*0.12;
+
+  // ball has no fixed colour — it interpolates path colours and "colours" each node on landing
+  let ballCol;
+  if(p.kind==='travel'){const a=ease((t-p.t0)/(p.t1-p.t0));
+    const fromS=p.idx===0?steps[0]:steps[p.idx-1];
+    ballCol=mixHex(nodeColor(fromS),nodeColor(steps[p.idx]),a);}
+  else ballCol=nodeColor(steps[p.kind==='intro'?0:p.idx]);
+
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#1c1c1c';ctx.fillRect(0,0,W,H);
+  drawDormant(t);
+
+  // node glows — a node lights only once the ball LANDS there (then stays lit)
+  const glows=steps.map((s,i)=>{const f=s._tFull;return t<f?0:clamp((t-f)/0.4,0,1);});
+  // make struck stay lit
+  const ball=project(ballW.wx,ballW.wy);
+  drawPath(struck,{x:ball.sx,y:ball.sy});
+  const projs=steps.map((s,i)=>drawNode(s,glows[i],t));
+
+  // fan + die + ripple at active stop
+  if(p.kind==='stop'&&!p.final){const s=steps[p.idx],pr=projs[p.idx];
+    const nx=nodeWorld(steps[p.idx+1]||steps[p.idx]);const np=project(nx.wx,nx.wy);
+    const ang=Math.atan2(np.sy-pr.sy,np.sx-pr.sx);
+    const chosenLen=Math.hypot(np.sx-pr.sx,np.sy-pr.sy);   // actual screen distance to next node
+    const stopProgress=clamp((t-p.t0)/(p.t1-p.t0),0,1);
+    drawDecisionFan(pr,ang,p.idx,stopProgress,chosenLen);
+    const age=t-p.t0,rolling=age<0.8&&temp>0;const face=rolling?(Math.floor(t*22)%6)+1:((Math.floor(s.x)%6)+1);
+    const shake=rolling?Math.sin(t*40)*2:0,bob=Math.sin(t*6)*2.5;
+    drawDie(pr.sx+shake,pr.sy-30*pr.s+bob,18*pr.s,face);
+    if(age<0.7){const rr=age/0.7;ctx.strokeStyle=hexA(s.color==='#9a9a9a'?'#cfcfcf':s.color,(1-rr)*0.5);ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(pr.sx,pr.sy,10*pr.s+rr*40,0,7);ctx.stroke();}}
+
+  drawBall(ball.sx,ball.sy,10*ball.s,ballCol);
+
+  drawSentence(Math.max(0,struck));
+  let cA=1;const into=t-p.t0,out=p.t1-t;if(into<0.35)cA=into/0.35;if(out<0.35)cA=Math.min(cA,out/0.35);
+  drawCaption(p.cap||'',Math.max(0,cA));
+}
+function loop(now){try{frame(now);}catch(e){console.error(e);}if(!paused)requestAnimationFrame(loop);}
+
+function setRun(r){run=r;buildSchedule();camFocus=steps[0].x-260;start=performance.now();
+  document.getElementById('v1').classList.toggle('on',r===1);
+  document.getElementById('v2').classList.toggle('on',r===2);
+  if(paused){paused=false;document.getElementById('pause').textContent='Pause';requestAnimationFrame(loop);}}
+document.getElementById('v1').onclick=()=>setRun(1);
+document.getElementById('v2').onclick=()=>setRun(2);
+document.getElementById('replay').onclick=()=>{start=performance.now();if(paused){paused=false;document.getElementById('pause').textContent='Pause';requestAnimationFrame(loop);}};
+document.getElementById('pause').onclick=e=>{paused=!paused;e.target.textContent=paused?'Play':'Pause';if(!paused){start=performance.now()-pauseT;requestAnimationFrame(loop);}else pauseT=performance.now()-start;};
+document.getElementById('temp').addEventListener('input',e=>{temp=parseFloat(e.target.value);document.getElementById('tempVal').textContent=temp.toFixed(2);});
+canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top;});
+canvas.addEventListener('mouseleave',()=>{mx=-999;my=-999;});
+window.addEventListener('resize',resize);
+resize();camFocus=steps[0].x-260;requestAnimationFrame(loop);
+</script>
+</body>
+</html>

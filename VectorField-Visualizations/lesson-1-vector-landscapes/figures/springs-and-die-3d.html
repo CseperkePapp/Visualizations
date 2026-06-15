@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vector Landscape — 3D</title>
+<style>
+  html,body{margin:0;background:#1c1c1c;color:#cfcfcf;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:hidden;}
+  #stage{position:fixed;inset:0;}
+  #sentence{position:fixed;top:0;left:0;right:0;padding:14px 20px;font-family:Georgia,serif;font-size:19px;
+    background:linear-gradient(#141414cc,#14141400);pointer-events:none;text-align:center;}
+  #sentence .lbl{display:block;font-family:-apple-system,sans-serif;font-size:11px;color:#7c7c7c;margin-bottom:4px;letter-spacing:.04em;}
+  #controls{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;}
+  button{background:#2a2a2acc;color:#dcdcdc;border:1px solid #3a3a3a;border-radius:8px;padding:8px 13px;font-size:14px;cursor:pointer;}
+  button:hover{background:#333;}
+  button.on{background:#3a4a63;border-color:#54739e;color:#eaf1ff;}
+  button.dim{opacity:0.4;}
+  #controls label{display:flex;align-items:center;gap:6px;color:#cfcfcf;font-size:13px;background:#2a2a2acc;border:1px solid #3a3a3a;border-radius:8px;padding:6px 10px;}
+  #controls input[type=range]{width:88px;accent-color:#54739e;cursor:pointer;}
+  #controls #tempVal{min-width:30px;color:#9fb6d6;font-variant-numeric:tabular-nums;}
+  #cap{position:fixed;bottom:58px;left:0;right:0;text-align:center;color:#9a9a9a;font-size:13px;pointer-events:none;}
+  #err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:40px;text-align:center;color:#e08;}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="sentence"><span class="lbl">THE SENTENCE BEING BORN</span><span id="words"></span></div>
+<div id="cap"></div>
+<div id="controls">
+  <button id="v1" class="on">Version 1 · moth</button>
+  <button id="v2">Version 2 · door</button>
+  <button id="replay">Replay</button>
+  <button id="pause">Pause</button>
+  <button id="rings" title="Show the shared deep-basin rings (◎) both versions pass through">◎ Basins</button>
+  <button id="both" title="Run both versions at once on the same terrain">⊕ Both</button>
+  <label id="tempCtl" title="Temperature: how wide the spread is before the die picks">🌡<input id="temp" type="range" min="0" max="1.5" step="0.01" value="0.7"><span id="tempVal">0.70</span></label>
+</div>
+<div id="err">Could not load Three.js (offline?). Open with an internet connection, or via VSCode Live Server.</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="vector-field-clusters.js"></script>
+<script>
+(function(){
+const VF=window.VECTOR_FIELD;
+if(!window.THREE||!VF){document.getElementById('err').style.display='flex';return;}
+
+const stage=document.getElementById('stage');
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x1c1c1c);
+scene.fog=new THREE.FogExp2(0x1c1c1c,0.018);
+const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,0.1,500);
+camera.position.set(20,11,24);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+stage.appendChild(renderer.domElement);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.dampingFactor=0.08;controls.target.set(0,2,0);
+controls.autoRotate=true;controls.autoRotateSpeed=0.45;
+
+scene.add(new THREE.HemisphereLight(0xbcd0ff,0x202024,0.7));
+const dl=new THREE.DirectionalLight(0xffffff,0.6);dl.position.set(10,18,12);scene.add(dl);
+const ballLight=new THREE.PointLight(0xffffff,0.8,40);scene.add(ballLight);
+
+function colHex(c){return new THREE.Color(c);}
+function glowSprite(color,scale){
+  const cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d');
+  const grd=g.createRadialGradient(64,64,0,64,64,64);
+  grd.addColorStop(0,color);grd.addColorStop(0.3,color);grd.addColorStop(1,'rgba(0,0,0,0)');
+  g.globalAlpha=0.9;g.fillStyle=grd;g.beginPath();g.arc(64,64,64,0,7);g.fill();
+  const tx=new THREE.CanvasTexture(cv);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+  sp.scale.set(scale,scale,1);return sp;
+}
+function makeLabel(text,color,big){
+  const cv=document.createElement('canvas');cv.width=256;cv.height=64;const g=cv.getContext('2d');
+  g.font=(big?'500 34px ':'30px ')+'Georgia,serif';g.textAlign='center';g.textBaseline='middle';
+  g.fillStyle=color;g.fillText(text,128,32);
+  const tx=new THREE.CanvasTexture(cv);tx.minFilter=THREE.LinearFilter;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false}));
+  sp.scale.set(big?4:3.2,big?1:0.8,1);return sp;
+}
+
+// build clusters: member nodes + labels + cluster labels + edges
+const nodeMap={};      // 'CLUSTER|member' -> {mesh, label, color}
+const clusterPos={};
+const clusterLabels={}; // clusterId -> {sp, col3, lit} : grey title until the ball reaches it
+VF.CLUSTERS.forEach(cl=>{
+  clusterPos[cl.id]=cl.center;
+  cl.members.forEach(m=>{
+    const p=VF.resolve(cl.id,m[0]);
+    const mesh=new THREE.Mesh(
+      new THREE.SphereGeometry(0.22,16,16),
+      new THREE.MeshStandardMaterial({color:colHex(cl.color),emissive:colHex(cl.color),emissiveIntensity:0.12,roughness:0.5,metalness:0.1})
+    );
+    mesh.position.set(p[0],p[1],p[2]);scene.add(mesh);
+    const lab=makeLabel(m[0],'#cfcfcf',false);lab.position.set(p[0],p[1]+0.6,p[2]);lab.material.opacity=0.22;scene.add(lab);
+    nodeMap[cl.id+'|'+m[0]]={mesh,label:lab,color:cl.color,col3:colHex(cl.color),labCol3:colHex(cl.color==='#9a9a9a'?'#cfcfcf':cl.color)};
+  });
+  const cp=cl.center;const ctl=makeLabel(cl.label,'#ffffff',true); // white-baked, tinted per frame
+  ctl.position.set(cp[0],cp[1]+1.7,cp[2]);ctl.material.opacity=0.32;scene.add(ctl);
+  clusterLabels[cl.id]={sp:ctl,col3:colHex(cl.color),lit:0};
+});
+VF.EDGES.forEach(e=>{
+  const a=clusterPos[e.a],b=clusterPos[e.b];
+  const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]);
+  const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:0x8899aa,transparent:true,opacity:0.06+e.affinity*0.12}));
+  scene.add(line);
+});
+
+// shared-basin rings (◎) — the deep basins both versions pass through. Off by default;
+// toggled by the "◎ Basins" button.
+let showRings=false;
+const ringMeshes=[];
+['FEED|feed','SELF|self'].forEach(k=>{
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.55,0.03,8,32),
+    new THREE.MeshBasicMaterial({color:0xdddddd,transparent:true,opacity:0.5}));
+  ring.position.copy(nodeMap[k].mesh.position);ring.visible=false;scene.add(ring);ringMeshes.push(ring);
+});
+
+// ball + glow + trail
+// satin ball, NOT chrome; its COLOUR is set per-frame from the path (see frame loop) —
+// the ball carries the word colour and "colours" each node as it lands.
+const ball=new THREE.Mesh(new THREE.SphereGeometry(0.34,32,32),
+  new THREE.MeshStandardMaterial({color:0xece7dd,emissive:0x000000,emissiveIntensity:0.55,roughness:0.4,metalness:0.2}));
+scene.add(ball);
+const ballGlow=glowSprite('rgba(220,230,255,1)',2.2);scene.add(ballGlow);
+const trailGeo=new THREE.BufferGeometry();
+const trailPos=new Float32Array(64*3);
+trailGeo.setAttribute('position',new THREE.BufferAttribute(trailPos,3));
+const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0xcfd6e0,transparent:true,opacity:0.55}));
+scene.add(trail);
+const activeGlow=glowSprite('rgba(255,255,255,1)',3.0);activeGlow.material.opacity=0;scene.add(activeGlow);
+
+// ---- temperature ----
+let temp=0.7;
+const tempInput=document.getElementById('temp'),tempVal=document.getElementById('tempVal');
+// cold = cyan/blue, normal = purple, warm = red
+const _COLD=new THREE.Color(0x35b6e0),_MID=new THREE.Color(0x9b8bf0),_HOT=new THREE.Color(0xe24838);
+function tempColor(tp){return tp<=0.75?_COLD.clone().lerp(_MID,tp/0.75):_MID.clone().lerp(_HOT,(tp-0.75)/0.75);}
+function applyTempColor(){const s=tempColor(temp).getStyle();tempInput.style.accentColor=s;tempVal.style.color=s;}
+tempInput.addEventListener('input',()=>{temp=parseFloat(tempInput.value);tempVal.textContent=temp.toFixed(2);applyTempColor();});
+applyTempColor();
+document.getElementById('rings').addEventListener('click',e=>{showRings=!showRings;e.target.classList.toggle('on',showRings);});
+document.getElementById('both').addEventListener('click',e=>{bothMode=!bothMode;e.target.classList.toggle('on',bothMode);
+  document.getElementById('v1').classList.toggle('dim',bothMode);   // grey out the version buttons while Both is on
+  document.getElementById('v2').classList.toggle('dim',bothMode);
+  start=performance.now();document.getElementById('cap').textContent='';
+  if(paused){paused=false;document.getElementById('pause').textContent='Pause';requestAnimationFrame(loop);}});
+
+// ---- ghost connection arrows (always present, faint; highlight when active), pooled ----
+const MAX_ARROWS=16;
+const arrows=[];
+for(let i=0;i<MAX_ARROWS;i++){
+  const a=new THREE.ArrowHelper(new THREE.Vector3(1,0,0),new THREE.Vector3(),1,0xffffff,0.3,0.18);
+  a.line.material.transparent=true;a.cone.material.transparent=true;a.visible=false;
+  scene.add(a);arrows.push(a);
+}
+// ---- chosen-path arrows: the committed route, coloured, with variable THICKNESS ----
+// Built as cylinders + cones (WebGL ignores line width), so radius = thickness is controllable.
+const _shaftGeo=new THREE.CylinderGeometry(1,1,1,10);
+const _headGeo=new THREE.ConeGeometry(1,1,12);
+const _Y=new THREE.Vector3(0,1,0);
+const pathArrows=[];
+for(let i=0;i<10;i++){
+  const shaft=new THREE.Mesh(_shaftGeo,new THREE.MeshBasicMaterial({color:0xffffff}));
+  const head=new THREE.Mesh(_headGeo,new THREE.MeshBasicMaterial({color:0xffffff}));
+  shaft.visible=head.visible=false;scene.add(shaft);scene.add(head);
+  pathArrows.push({shaft,head});
+}
+// ---- BOTH-RUNS MODE: a second ball + second route, to run v1 and v2 on the shared terrain ----
+let bothMode=false;
+const PA=VF.PATHS.v1, PB=VF.PATHS.v2;
+function posIn(arr,i){const s=arr[i];const q=VF.resolve(s.c,s.m);return new THREE.Vector3(q[0],q[1],q[2]);}
+function launchFor(arr){const p0=posIn(arr,0),p1=posIn(arr,1);return p0.clone().add(p0.clone().sub(p1).normalize().multiplyScalar(5));}
+const launchA=launchFor(PA), launchB=launchFor(PB);
+const ballB=new THREE.Mesh(new THREE.SphereGeometry(0.34,32,32),
+  new THREE.MeshStandardMaterial({color:0xece7dd,emissive:0x000000,emissiveIntensity:0.55,roughness:0.4,metalness:0.2}));
+ballB.visible=false;scene.add(ballB);
+const ballGlowB=glowSprite('rgba(220,230,255,1)',2.2);ballGlowB.material.opacity=0;scene.add(ballGlowB);
+const pathArrowsB=[];
+for(let i=0;i<10;i++){
+  const shaft=new THREE.Mesh(_shaftGeo,new THREE.MeshBasicMaterial({color:0xffffff}));
+  const head=new THREE.Mesh(_headGeo,new THREE.MeshBasicMaterial({color:0xffffff}));
+  shaft.visible=head.visible=false;scene.add(shaft);scene.add(head);pathArrowsB.push({shaft,head});
+}
+function setThickArrow(o,from,to,color,radius){
+  const dir=to.clone().sub(from);const len=dir.length();
+  if(len<1e-3){o.shaft.visible=false;o.head.visible=false;return;}
+  const ndir=dir.clone().normalize();
+  const q=new THREE.Quaternion().setFromUnitVectors(_Y,ndir);
+  const headLen=Math.min(0.7,len*0.24),shaftLen=Math.max(0.01,len-headLen);
+  o.shaft.visible=true;o.shaft.setRotationFromQuaternion(q);
+  o.shaft.scale.set(radius,shaftLen,radius);
+  o.shaft.position.copy(from).add(ndir.clone().multiplyScalar(shaftLen*0.5));
+  o.shaft.material.color.copy(color);
+  o.head.visible=true;o.head.setRotationFromQuaternion(q);
+  o.head.scale.set(radius*2.6,headLen,radius*2.6);
+  o.head.position.copy(from).add(ndir.clone().multiplyScalar(shaftLen+headLen*0.5));
+  o.head.material.color.copy(color);
+}
+function setArrow(a,from,to,color,opacity){
+  const dir=to.clone().sub(from);const len=dir.length();
+  if(len<1e-3||opacity<=0.02){a.visible=false;return;}
+  a.visible=true;a.position.copy(from);a.setDirection(dir.normalize());
+  a.setLength(len,Math.min(0.55,len*0.2),Math.min(0.32,len*0.13));
+  a.setColor(color);
+  a.line.material.opacity=opacity;a.cone.material.opacity=opacity;
+}
+
+// ---- small floating polyhedral die (sprite). A wink to RPG fans: more choice = more faces.
+// Cold/few options -> d4; hot/many options -> d20. Colour tracks the temperature.
+const DICE=[
+  {n:4, sides:3, rot:0},            // triangle, point up
+  {n:6, sides:4, rot:Math.PI/4},    // square, flat top
+  {n:8, sides:4, rot:0},            // diamond, point up
+  {n:10, kite:true},                // kite
+  {n:12, sides:5, rot:0},           // pentagon, point up
+  {n:20, sides:6, rot:Math.PI/6}    // hexagon, flat top
+];
+function dieFor(tp){return DICE[Math.min(DICE.length-1,Math.floor(tp/1.5*DICE.length))];}
+function settledVal(i,n){return ((i*5+(ver==='v1'?2:5))%n)+1;} // deterministic per step+version+die
+const dieCanvas=document.createElement('canvas');dieCanvas.width=dieCanvas.height=72;
+const dieTex=new THREE.CanvasTexture(dieCanvas);
+const die=new THREE.Sprite(new THREE.SpriteMaterial({map:dieTex,transparent:true,depthWrite:false}));
+die.scale.set(0.8,0.8,1);die.visible=false;scene.add(die);
+let dieKey='';
+function drawDie(val,dn,faceStyle,edgeStyle){
+  const key=val+'|'+dn.n+'|'+faceStyle;if(key===dieKey)return;dieKey=key;
+  const g=dieCanvas.getContext('2d');g.clearRect(0,0,72,72);
+  const cx=36,cy=39,R=27;
+  g.beginPath();
+  if(dn.kite){ // d10: a kite (wide above centre, long point below)
+    [[0,-1.0],[0.62,-0.12],[0,0.96],[-0.62,-0.12]].forEach((p,i)=>{const x=cx+p[0]*R,y=cy+p[1]*R;i?g.lineTo(x,y):g.moveTo(x,y);});
+  } else {
+    const rot=(dn.rot||0)-Math.PI/2;
+    for(let i=0;i<dn.sides;i++){const a=rot+i*2*Math.PI/dn.sides,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;i?g.lineTo(x,y):g.moveTo(x,y);}
+  }
+  g.closePath();g.fillStyle=faceStyle;g.fill();g.lineWidth=3;g.strokeStyle=edgeStyle;g.stroke();
+  g.fillStyle='#15171c';g.textAlign='center';g.textBaseline='middle';
+  g.font='bold 22px -apple-system,Segoe UI,Roboto,sans-serif';g.fillText(String(val),cx,cy+1);
+  g.fillStyle=edgeStyle;g.font='bold 10px -apple-system,sans-serif';g.fillText('d'+dn.n,cx,10);
+  dieTex.needsUpdate=true;
+}
+
+// ---- invented "roads not taken": mostly NEW clusters (a few familiar), varied ----
+// w=head word (lit, coloured), c=colour, n=grey neighbour words, d=realistic distance.
+// Distance reads as the article does: short hop = expected, long jump = surreal leap.
+const GHOSTS=[
+  {w:'ocean',  c:'#3FA9C9', n:['tide','salt','drift'],     d:6.4},
+  {w:'machine',c:'#C98A3F', n:['gear','rust','lever'],     d:4.0},
+  {w:'garden', c:'#6FBF73', n:['root','bloom','soil'],     d:3.1},
+  {w:'fire',   c:'#E2603B', n:['ash','ember','smoke'],     d:5.0},
+  {w:'music',  c:'#B07FE0', n:['note','chord','echo'],     d:3.7},
+  {w:'mother', c:'#E08CA8', n:['lullaby','apron','warmth'],d:2.7},
+  {w:'map',    c:'#7FA8D0', n:['border','north','route'],  d:5.6},
+  {w:'glass',  c:'#7FD0C0', n:['shard','clear','break'],   d:3.4},
+  {w:'storm',  c:'#5B8FB0', n:['thunder','wind','grey'],   d:6.1},
+  {w:'letter', c:'#D0B07F', n:['stamp','ink','unsent'],    d:4.4},
+  {w:'animal', c:'#C9B23F', n:['fur','paw','den'],         d:4.8},
+  {w:'number', c:'#9AA0A8', n:['seven','count','zero'],    d:7.0},
+  {w:'mirror', c:'#A8C0C9', n:['twin','silver','stranger'],d:2.6},
+  {w:'clock',  c:'#3E8EE0', n:['tick','late','noon'],      d:3.0}
+];
+
+// floating word labels, pooled by text (white-baked, tinted per frame)
+const ghostLabels={};
+function ghostLabel(text){
+  if(!ghostLabels[text]){const sp=makeLabel(text,'#ffffff',false);sp.material.opacity=0;scene.add(sp);ghostLabels[text]=sp;}
+  return ghostLabels[text];
+}
+
+// PERSISTENT ghost clusters: always present in the landscape as faint dormant words at
+// fixed scattered positions. They light up (coloured) when an arrival points at them, then
+// slowly fade back to dormant — never fully gone. ~56 sprites + a lerp/frame: cheap.
+const HEAD_OFF=new THREE.Vector3(0,0.45,0);
+const NEIGH_OFF=[new THREE.Vector3(0.9,-0.55,0.1),new THREE.Vector3(-0.85,-0.5,0.35),
+  new THREE.Vector3(0.15,-1.05,-0.4),new THREE.Vector3(-0.2,0.0,0.7)];
+const ghosts=GHOSTS.map((g,idx)=>{
+  const a=idx*2.399963229;                 // golden angle -> even scatter
+  const r=7+g.d;                           // realistic-ish distance from the field centre
+  const pos=new THREE.Vector3(Math.cos(a)*r,-3+((idx*2.7)%8),Math.sin(a)*r);
+  return {c:g.c,col3:new THREE.Color(g.c),pos,lit:0,origin:-1,
+    head:ghostLabel(g.w),neigh:g.n.map(w=>ghostLabel(w))};
+});
+function renderGhost(G){
+  const L=G.lit;                                               // 0 dormant .. 1 active
+  G.head.visible=true;G.head.position.copy(G.pos).add(HEAD_OFF);
+  G.head.material.color.copy(NODE_GREY).lerp(G.col3,L);        // grey -> colour
+  G.head.material.opacity=0.05+L*0.90;                         // transparent -> opaque
+  const hs=2.2+0.35*L;G.head.scale.set(hs,hs*0.28,1);
+  G.neigh.forEach((sp,ni)=>{sp.visible=true;sp.position.copy(G.pos).add(NEIGH_OFF[ni]||NEIGH_OFF[0]);
+    sp.material.color.set('#9a9a9a');sp.material.opacity=0.04+L*0.42;sp.scale.set(1.5,0.42,1);}); // grey always
+}
+
+// faint "everything is connected" web — every node linked to its nearest few neighbours
+// (real members AND ghosts), baked into ONE LineSegments = a single draw call, ~zero cost.
+(function buildWeb(){
+  const pts=[];
+  for(const k in nodeMap)pts.push(nodeMap[k].mesh.position);
+  for(const g of ghosts)pts.push(g.pos);
+  const seg=[];
+  for(let i=0;i<pts.length;i++){
+    const near=pts.map((q,j)=>({j,d:i===j?1e9:pts[i].distanceToSquared(q)})).sort((a,b)=>a.d-b.d);
+    for(let n=0;n<3;n++){const j=near[n].j;if(j>i)seg.push(pts[i],pts[j]);} // j>i = no duplicate pairs
+  }
+  const arr=new Float32Array(seg.length*3);
+  seg.forEach((v,k)=>{arr[k*3]=v.x;arr[k*3+1]=v.y;arr[k*3+2]=v.z;});
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(arr,3));
+  scene.add(new THREE.LineSegments(geo,new THREE.LineBasicMaterial({color:0x8b94a6,transparent:true,opacity:0.04})));
+})();
+
+// schedule
+let ver='v1',steps=[],phases=[],total=0,launch=new THREE.Vector3(),curAnchor=0;
+const T_intro=1.2,T_travel=1.9,T_dwell=3.8,T_fork=4.6,T_gap=2.2; // long dwell: options linger before the roll
+function pos(i){const s=steps[i];const p=VF.resolve(s.c,s.m);return new THREE.Vector3(p[0],p[1],p[2]);}
+function build(){
+  steps=VF.PATHS[ver];phases=[];let t=T_intro;
+  const p0=pos(0),p1=pos(1);launch=p0.clone().add(p0.clone().sub(p1).normalize().multiplyScalar(5));
+  for(let i=0;i<steps.length;i++){
+    const from=i===0?launch:pos(i-1);
+    phases.push({kind:'travel',i,from,to:pos(i),t0:t,t1:t+T_travel});t+=T_travel;
+    const dur=steps[i].fork?T_fork:T_dwell;
+    steps[i]._tArr=phases[phases.length-1].t1;
+    phases.push({kind:'dwell',i,t0:t,t1:t+dur});t+=dur;
+  }
+  total=t+T_gap;
+}
+function phaseAt(t){for(const p of phases)if(t>=p.t0&&t<p.t1)return p;return phases[phases.length-1];}
+
+// FIELD vs WRITTEN: dormant nodes are just WORDS (no ball). A ball only appears where the
+// rolling ball has landed and "left one behind" — those are the words being written.
+const NODE_GREY=new THREE.Color(0x6e6e6e);
+function dimAll(){for(const k in nodeMap){const n=nodeMap[k];
+  n.mesh.visible=false;                                   // possibility = just a word, no ball
+  n.label.material.color.setRGB(0.8,0.8,0.8);n.label.material.opacity=0.18;}}
+function litNode(key,intensity,scale,labOp){const n=nodeMap[key];if(!n)return;
+  n.mesh.visible=true;                                    // a ball left behind = a written word
+  n.mesh.material.color.copy(n.col3);n.mesh.material.emissive.copy(n.col3);
+  n.mesh.material.emissiveIntensity=intensity;n.mesh.scale.setScalar(scale);
+  n.label.material.color.copy(n.labCol3);n.label.material.opacity=Math.max(n.label.material.opacity,labOp);}
+function setSentence(struck){
+  const wEl=document.getElementById('words');let html='';
+  for(let i=0;i<=struck&&i<steps.length;i++){const s=steps[i];const c=nodeMap[s.c+'|'+s.m].color;
+    const col=c==='#9a9a9a'?'#cfcfcf':c;const op=i===struck?1:0.72;
+    html+='<span style="color:'+col+';opacity:'+op+'"> '+s.frag+'</span>';}
+  wEl.innerHTML=html;
+}
+
+let start=performance.now(),paused=false,pauseT=0,lastT=0;
+function frame(now){
+  let t=(now-start)/1000;if(t>total)t=t%total;
+  const p=phaseAt(t);
+  ballB.visible=false;ballGlowB.visible=false;trail.visible=true;   // hide both-mode extras
+  for(const o of pathArrowsB){o.shaft.visible=false;o.head.visible=false;}
+  let ballPos,struck=-1;
+  if(p.kind==='travel'){const a=THREE.MathUtils.smoothstep((t-p.t0)/(p.t1-p.t0),0,1);
+    ballPos=p.from.clone().lerp(p.to,a);struck=p.i-1;}
+  else{ballPos=pos(p.i);struck=p.i;}
+  if(t<lastT){/*looped*/}lastT=t;
+
+  dimAll();
+  // visited path words stay coloured (the sentence the ball has built)
+  const usedClusters=new Set();
+  for(let i=0;i<=struck&&i<steps.length;i++){litNode(steps[i].c+'|'+steps[i].m,0.9,1.5,0.95);usedClusters.add(steps[i].c);}
+
+  // cluster titles: grey until the ball reaches a node in that cluster, then their colour (stays)
+  for(const id in clusterLabels){const cL=clusterLabels[id];
+    cL.lit+=((usedClusters.has(id)?1:0)-cL.lit)*0.08;
+    cL.sp.material.color.copy(NODE_GREY).lerp(cL.col3,cL.lit);
+    cL.sp.material.opacity=0.30+cL.lit*0.45;}
+
+  ball.position.copy(ballPos);ballGlow.position.copy(ballPos);ballLight.position.copy(ballPos);
+
+  // the ball has no colour of its own — it interpolates the colour of the word it's on / heading
+  // to, so the rolling ball is what "colours" each node as it lands.
+  let ballCol;
+  if(p.kind==='travel'){
+    const prog=THREE.MathUtils.smoothstep((t-p.t0)/(p.t1-p.t0),0,1);
+    const toK=steps[p.i].c+'|'+steps[p.i].m;
+    const fromK=p.i>0?steps[p.i-1].c+'|'+steps[p.i-1].m:toK;
+    ballCol=nodeMap[fromK].col3.clone().lerp(nodeMap[toK].col3,prog);
+  }else ballCol=nodeMap[steps[p.i].c+'|'+steps[p.i].m].col3.clone();
+  ball.material.color.copy(ballCol);
+  ball.material.emissive.copy(ballCol).multiplyScalar(0.5);
+  ballGlow.material.color.copy(ballCol);
+
+  // ---- decision fan + persistent ghost clusters ----
+  // Decision node = where the current choice is/was made: the dwell node, or (while
+  // travelling) the node just left. Its options stay lit until the ball LANDS at the next
+  // node; then they slowly fade back to dormant ghosts (smoothed lerp, never fully gone).
+  let di=-1,inDwell=false,dwellAge=0,dwellDur=1;
+  if(p.kind==='dwell'){di=p.i;inDwell=true;dwellAge=t-p.t0;dwellDur=p.t1-p.t0;}
+  else if(p.kind==='travel'){di=p.i-1;}        // travelling toward p.i; choice made at p.i-1
+  if(di>=steps.length-1)di=-1;                 // last node / pre-roll intro -> no decision
+  const heat=temp/1.5;
+
+  // which ghosts are this decision's active options (varied per node, count scales w/ temp)
+  const selected=new Set();
+  if(di>=0)curAnchor=di;                         // anchor the connection web at the current decision node
+  if(di>=0){
+    const nAlts=Math.round(heat*Math.min(8,ghosts.length));   // how many connections HIGHLIGHT
+    const startG=di*3+(ver==='v1'?0:7);
+    for(let k=0;k<nAlts;k++)selected.add((startG+k)%ghosts.length);
+  }
+
+  // chosen-path arrows: committed segments + the in-progress choice, coloured & persistent.
+  // ALL lines are the same thin thickness (only colour changes). The ONLY thickness change is
+  // a transient 2x on the active segment — AFTER the die rolls, until the ball arrives — then
+  // back to normal. Node lights only on landing.
+  const BASE_R=0.018;
+  let dieSettled=false;
+  if(p.kind==='dwell'&&di>=0)dieSettled=(t-p.t0)>=((p.t1-p.t0)-0.4);
+  let pa=0;
+  for(let s=0;s<=struck && s<steps.length-1; s++,pa++){
+    const col=nodeMap[steps[s+1].c+'|'+steps[s+1].m].col3;
+    const active=(s===struck);                          // the in-progress / just-traversed segment
+    const thick=active && (p.kind==='travel' || dieSettled); // post-roll through arrival only
+    setThickArrow(pathArrows[pa],pos(s),pos(s+1),col,BASE_R*(thick?2:1));
+  }
+  for(;pa<pathArrows.length;pa++){pathArrows[pa].shaft.visible=false;pathArrows[pa].head.visible=false;}
+
+  // ghost option arrows use their own pool from index 0
+  let ai=0;
+
+  // EVERY ghost connection always exists (faint grey, non-intrusive). Active options highlight
+  // in colour, then fade their colour back to grey — but the line keeps existing.
+  for(let gi=0;gi<ghosts.length;gi++){
+    const G=ghosts[gi];const target=selected.has(gi)?1:0;
+    G.lit+=(target-G.lit)*0.06;                // smoothing => fade colour back to grey, never gone
+    renderGhost(G);
+    if(ai<MAX_ARROWS){
+      const col=NODE_GREY.clone().lerp(G.col3,G.lit);          // faint grey <-> colour
+      setArrow(arrows[ai++],pos(curAnchor),G.pos,col,0.05+(0.16+0.28*heat)*G.lit);
+    }
+  }
+  for(;ai<MAX_ARROWS;ai++)arrows[ai].visible=false;
+
+  // active glow + die only while sitting at the node (the roll happens AT the node)
+  if(inDwell&&di>=0){
+    const np=pos(di);activeGlow.position.copy(np);activeGlow.material.opacity=Math.max(0,0.7-dwellAge*0.25);
+    const sc=3+Math.sin(t*4)*0.4;activeGlow.scale.set(sc,sc,1);
+    const rollStart=dwellDur-1.3,rollEnd=dwellDur-0.4;
+    const rolling=temp>0&&dwellAge>rollStart&&dwellAge<rollEnd,settled=dwellAge>=rollEnd;
+    const dn=dieFor(temp),tc=tempColor(temp);                        // d4..d20 + colour by temperature
+    const faceStyle=tc.clone().lerp(new THREE.Color(0xffffff),0.6).getStyle(),edgeStyle=tc.getStyle();
+    die.visible=true;die.position.copy(np).setY(np.y+0.95);
+    if(rolling){const shk=0.1*temp;die.position.x+=Math.sin(t*47)*shk;die.position.z+=Math.cos(t*41)*shk;
+      drawDie((Math.floor(t*14)%dn.n)+1,dn,faceStyle,edgeStyle);}
+    else drawDie(settledVal(di,dn.n),dn,faceStyle,edgeStyle);
+    die.material.opacity=(temp>0?THREE.MathUtils.smoothstep(dwellAge,rollStart-0.3,rollStart):0.5)*(settled?0.85:1);
+  }else{activeGlow.material.opacity*=0.9;die.visible=false;}
+
+  // trail through visited nodes + ball
+  const pts=[launch];for(let i=0;i<=struck&&i<steps.length;i++)pts.push(pos(i));pts.push(ballPos);
+  const n=Math.min(pts.length,64);
+  for(let i=0;i<n;i++){trailPos[i*3]=pts[i].x;trailPos[i*3+1]=pts[i].y;trailPos[i*3+2]=pts[i].z;}
+  trailGeo.setDrawRange(0,n);trailGeo.attributes.position.needsUpdate=true;
+
+  ringMeshes.forEach(r=>{r.visible=showRings;if(showRings)r.rotation.z+=0.01;});
+  setSentence(Math.max(0,struck));
+  let cap='';
+  if(temp<=0) cap='temperature 0 — deterministic: same prompt, same sentence';
+  else if(p.kind==='dwell'&&steps[p.i].shared) cap='a deep basin — both versions pass through here';
+  document.getElementById('cap').textContent=cap;
+
+  controls.update();
+  renderer.render(scene,camera);
+}
+// ---- BOTH-RUNS rendering: v1 and v2 at once, sharing the field (no fan/die — the point is
+// the two routes diverging over the same terrain). Reuses the single-run helpers. ----
+function runState(arr,launch,p,t){
+  if(p.kind==='travel'){const a=THREE.MathUtils.smoothstep((t-p.t0)/(p.t1-p.t0),0,1);
+    const from=p.i===0?launch:posIn(arr,p.i-1);
+    return {bp:from.clone().lerp(posIn(arr,p.i),a),struck:p.i-1};}
+  return {bp:posIn(arr,p.i),struck:p.i};
+}
+function colorBall(bm,gl,arr,p,t){
+  let c;
+  if(p.kind==='travel'){const pr=THREE.MathUtils.smoothstep((t-p.t0)/(p.t1-p.t0),0,1);
+    const toK=arr[p.i].c+'|'+arr[p.i].m,fromK=p.i>0?arr[p.i-1].c+'|'+arr[p.i-1].m:toK;
+    c=nodeMap[fromK].col3.clone().lerp(nodeMap[toK].col3,pr);}
+  else c=nodeMap[arr[p.i].c+'|'+arr[p.i].m].col3.clone();
+  bm.material.color.copy(c);bm.material.emissive.copy(c).multiplyScalar(0.5);
+  if(gl){gl.material.color.copy(c);gl.material.opacity=0.9;}
+}
+function litPath(arr,struck,used){for(let i=0;i<=struck&&i<arr.length;i++){litNode(arr[i].c+'|'+arr[i].m,0.9,1.5,0.95);used.add(arr[i].c);}}
+function drawRoute(pool,arr,struck){let k=0;
+  for(let s=0;s<=struck&&s<arr.length-1;s++,k++)setThickArrow(pool[k],posIn(arr,s),posIn(arr,s+1),nodeMap[arr[s+1].c+'|'+arr[s+1].m].col3,0.018);
+  for(;k<pool.length;k++){pool[k].shaft.visible=false;pool[k].head.visible=false;}}
+function lineFor(arr,struck){let h='';for(let i=0;i<=struck&&i<arr.length;i++){
+  const c=nodeMap[arr[i].c+'|'+arr[i].m].color,col=c==='#9a9a9a'?'#cfcfcf':c,op=i===struck?1:0.72;
+  h+='<span style="color:'+col+';opacity:'+op+'"> '+arr[i].frag+'</span>';}return h;}
+function frameBoth(now){
+  let t=(now-start)/1000;if(t>total)t=t%total;
+  const p=phaseAt(t);
+  const A=runState(PA,launchA,p,t), B=runState(PB,launchB,p,t);
+  dimAll();
+  const used=new Set();litPath(PA,A.struck,used);litPath(PB,B.struck,used);
+  for(const id in clusterLabels){const cL=clusterLabels[id];cL.lit+=((used.has(id)?1:0)-cL.lit)*0.08;
+    cL.sp.material.color.copy(NODE_GREY).lerp(cL.col3,cL.lit);cL.sp.material.opacity=0.30+cL.lit*0.45;}
+  ball.position.copy(A.bp);ballGlow.position.copy(A.bp);ballLight.position.copy(A.bp);colorBall(ball,ballGlow,PA,p,t);
+  ballB.visible=true;ballGlowB.visible=true;ballB.position.copy(B.bp);ballGlowB.position.copy(B.bp);colorBall(ballB,ballGlowB,PB,p,t);
+  drawRoute(pathArrows,PA,A.struck);drawRoute(pathArrowsB,PB,B.struck);
+  for(const G of ghosts){G.lit+=(0-G.lit)*0.06;renderGhost(G);}   // ghosts stay dormant in both-mode
+  for(const a of arrows)a.visible=false;
+  die.visible=false;activeGlow.material.opacity*=0.9;trail.visible=false;
+  ringMeshes.forEach(r=>{r.visible=showRings;if(showRings)r.rotation.z+=0.01;});
+  document.getElementById('words').innerHTML='<div>'+lineFor(PA,A.struck)+'</div><div style="margin-top:5px;opacity:.92">'+lineFor(PB,B.struck)+'</div>';
+  document.getElementById('cap').textContent='both versions · same terrain, different dice';
+  controls.update();renderer.render(scene,camera);
+}
+function loop(now){try{(bothMode?frameBoth:frame)(now);}catch(e){console.error(e);}if(!paused)requestAnimationFrame(loop);}
+
+function setVer(v){
+  if(bothMode){bothMode=false;                                    // picking a version exits Both
+    document.getElementById('both').classList.remove('on');
+    document.getElementById('v1').classList.remove('dim');document.getElementById('v2').classList.remove('dim');}
+  ver=v;build();start=performance.now();
+  document.getElementById('v1').classList.toggle('on',v==='v1');
+  document.getElementById('v2').classList.toggle('on',v==='v2');
+  if(paused){paused=false;document.getElementById('pause').textContent='Pause';requestAnimationFrame(loop);}}
+document.getElementById('v1').onclick=()=>setVer('v1');
+document.getElementById('v2').onclick=()=>setVer('v2');
+document.getElementById('replay').onclick=()=>{start=performance.now();if(paused){paused=false;document.getElementById('pause').textContent='Pause';requestAnimationFrame(loop);}};
+document.getElementById('pause').onclick=e=>{paused=!paused;e.target.textContent=paused?'Play':'Pause';if(!paused){start=performance.now()-pauseT;requestAnimationFrame(loop);}else pauseT=performance.now()-start;};
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+build();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

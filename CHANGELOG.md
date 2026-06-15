@@ -7,6 +7,14 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.22.0] - 2026-06-15
+
+### Changed in 1.22.0
+
+- **Springier ball landing** in the 3D figure: travel now eases with an overshoot-and-settle
+  (`easeOutBack`) instead of a monotone smoothstep, plus a quick damped vertical bounce on
+  arrival (`landBounce`, decays ~0.5s). Applies in single and "Both" modes. Embed build regenerated.
+
 ## [1.21.0] - 2026-06-15
 
 ### Added in 1.21.0

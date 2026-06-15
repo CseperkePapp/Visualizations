@@ -1,7 +1,7 @@
 # Visualizations
 
 **Type:** Repo overview
-**Version:** 1.21.0
+**Version:** 1.22.0
 **Verified:** 2026-06-15
 
 ---

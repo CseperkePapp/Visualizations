@@ -330,6 +330,9 @@ function build(){
   total=t+T_gap;
 }
 function phaseAt(t){for(const p of phases)if(t>=p.t0&&t<p.t1)return p;return phases[phases.length-1];}
+// springy landing: overshoot-and-settle on the approach + a quick damped bounce on arrival
+function easeOutBack(x){const c1=1.1,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);}
+function landBounce(age){return Math.sin(age*19)*0.14*Math.exp(-age*7);} // decays in ~0.5s
 
 // FIELD vs WRITTEN: dormant nodes are just WORDS (no ball). A ball only appears where the
 // rolling ball has landed and "left one behind" — those are the words being written.
@@ -357,9 +360,9 @@ function frame(now){
   ballB.visible=false;ballGlowB.visible=false;trail.visible=true;   // hide both-mode extras
   for(const o of pathArrowsB){o.shaft.visible=false;o.head.visible=false;}
   let ballPos,struck=-1;
-  if(p.kind==='travel'){const a=THREE.MathUtils.smoothstep((t-p.t0)/(p.t1-p.t0),0,1);
+  if(p.kind==='travel'){const a=easeOutBack((t-p.t0)/(p.t1-p.t0));   // overshoot then settle
     ballPos=p.from.clone().lerp(p.to,a);struck=p.i-1;}
-  else{ballPos=pos(p.i);struck=p.i;}
+  else{ballPos=pos(p.i);ballPos.y+=landBounce(t-p.t0);struck=p.i;}    // damped bounce on landing
   if(t<lastT){/*looped*/}lastT=t;
 
   dimAll();
@@ -473,10 +476,10 @@ function frame(now){
 // ---- BOTH-RUNS rendering: v1 and v2 at once, sharing the field (no fan/die — the point is
 // the two routes diverging over the same terrain). Reuses the single-run helpers. ----
 function runState(arr,launch,p,t){
-  if(p.kind==='travel'){const a=THREE.MathUtils.smoothstep((t-p.t0)/(p.t1-p.t0),0,1);
+  if(p.kind==='travel'){const a=easeOutBack((t-p.t0)/(p.t1-p.t0));
     const from=p.i===0?launch:posIn(arr,p.i-1);
     return {bp:from.clone().lerp(posIn(arr,p.i),a),struck:p.i-1};}
-  return {bp:posIn(arr,p.i),struck:p.i};
+  const v=posIn(arr,p.i);v.y+=landBounce(t-p.t0);return {bp:v,struck:p.i};
 }
 function colorBall(bm,gl,arr,p,t){
   let c;

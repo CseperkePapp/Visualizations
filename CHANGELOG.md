@@ -7,6 +7,19 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.21.0] - 2026-06-15
+
+### Added in 1.21.0
+
+- **`index.html`** — GitHub Pages landing/gallery: lists the visualizations (2 so far) with
+  lazy live previews + full-screen links, a link to the lesson page, and the published article.
+  Fixes the Pages root 404 and scales as more figures are added.
+- **`lesson-1-vector-landscapes/WP-EMBED-SNIPPETS.md`** — copy-paste WordPress embed blocks for
+  both Lesson 1 figures (live Pages URLs, `#1c1c1c`, full-screen caption links).
+- **README "Live" section** with the Pages landing, lesson, figure, and article links.
+- Wired the published article URL (`pappcseperke.hu/understanding-vector-landscapes-lesson-1`)
+  into the landing page.
+
 ## [1.20.0] - 2026-06-15
 
 ### Added in 1.20.0

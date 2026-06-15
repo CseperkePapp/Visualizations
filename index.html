@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visualizations — interactive AI / physics / chemistry</title>
+<meta name="description" content="Educational, interactive browser visualizations. Each one teaches a single idea.">
+<style>
+  :root{--bg:#1c1c1c;--panel:#202024;--text:#cbd5e1;--head:#e8e8e8;--muted:#8a93a0;--accent:#5ab4c5;--line:#2c2f36;}
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6;}
+  .wrap{max-width:920px;margin:0 auto;padding:48px 20px 80px;}
+  h1{font-size:30px;font-weight:600;color:var(--head);margin:0 0 6px;}
+  .tag{color:var(--muted);font-size:15px;margin:0 0 18px;}
+  .top-links{font-size:14px;margin:0 0 38px;}
+  .top-links a{color:var(--accent);text-decoration:none;}
+  .top-links a:hover{text-decoration:underline;}
+  h2{font-size:21px;color:var(--head);font-weight:600;margin:40px 0 4px;}
+  .lesson-sub{color:var(--muted);font-size:14px;margin:0 0 18px;}
+  .lesson-sub a{color:var(--accent);text-decoration:none;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media (max-width:680px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:0;}
+  .card iframe{width:100%;height:300px;border:0;display:block;background:#1c1c1c;}
+  .card .meta{padding:12px 14px 14px;}
+  .card .meta b{color:var(--head);font-weight:600;}
+  .card .meta p{margin:4px 0 10px;font-size:13.5px;color:var(--muted);}
+  .card .meta a{color:var(--accent);text-decoration:none;font-size:13.5px;}
+  .card .meta a:hover{text-decoration:underline;}
+  footer{margin-top:54px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  footer a{color:var(--accent);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Visualizations</h1>
+  <p class="tag">Interactive, browser-based educational visualizations — mostly AI, physics, and chemistry. Each one teaches a single idea. No install; open and explore.</p>
+  <p class="top-links">
+    <a href="https://github.com/CseperkePapp/Visualizations">GitHub repository</a>
+    &nbsp;·&nbsp;
+    <a href="https://pappcseperke.hu/understanding-vector-landscapes-lesson-1/" target="_blank" rel="noopener">Read the article ↗</a>
+  </p>
+
+  <section>
+    <h2>Lesson 1 — Understanding Vector Landscapes</h2>
+    <p class="lesson-sub">
+      How a language model picks the next token: the board is fixed, springs set the odds, the die makes the pick.
+      &nbsp;·&nbsp;
+      <a href="VectorField-Visualizations/lesson-1-vector-landscapes/lesson-1.html">Read the lesson →</a>
+      &nbsp;·&nbsp;
+      <a href="https://pappcseperke.hu/understanding-vector-landscapes-lesson-1/" target="_blank" rel="noopener">Original article ↗</a>
+    </p>
+
+    <div class="grid">
+      <figure class="card">
+        <iframe src="VectorField-Visualizations/lesson-1-vector-landscapes/figures/terrain-vs-dice.html"
+                loading="lazy" title="Terrain vs. dice (2D)"></iframe>
+        <div class="meta">
+          <b>Terrain vs. dice — 2D</b>
+          <p>The same prompt run twice. Surface details diverge; the shared nodes are what survives the re-roll.</p>
+          <a href="VectorField-Visualizations/lesson-1-vector-landscapes/figures/terrain-vs-dice.html" target="_blank" rel="noopener">Open full screen ↗</a>
+        </div>
+      </figure>
+
+      <figure class="card">
+        <iframe src="VectorField-Visualizations/lesson-1-vector-landscapes/figures/springs-and-die-3d.html"
+                loading="lazy" allow="fullscreen" title="Springs &amp; die (3D)"></iframe>
+        <div class="meta">
+          <b>Springs &amp; the die — 3D</b>
+          <p>The field of options, temperature (cold → hot, d4 → d20), and the roll that commits to a word.</p>
+          <a href="VectorField-Visualizations/lesson-1-vector-landscapes/figures/springs-and-die-3d.html" target="_blank" rel="noopener">Open full screen ↗</a>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <footer>
+    More visualizations coming. Built in the open ·
+    <a href="https://github.com/CseperkePapp/Visualizations">source &amp; templates on GitHub</a> ·
+    <a href="https://github.com/CseperkePapp/Visualizations/blob/main/LICENSE">MIT</a>
+  </footer>
+
+</div>
+</body>
+</html>

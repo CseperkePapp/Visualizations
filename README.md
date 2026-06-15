@@ -1,7 +1,7 @@
 # Visualizations
 
 **Type:** Repo overview
-**Version:** 1.20.0
+**Version:** 1.21.0
 **Verified:** 2026-06-15
 
 ---
@@ -19,6 +19,20 @@ This repo is built **with AI assistance** (Claude and Codex as first-class
 collaborators). It carries a lightweight, Markdown-first workflow — adapted from a
 general AI-project workflow kernel — so that specs, build tasks, and accuracy reviews
 stay disciplined across long gaps and context switches.
+
+---
+
+## Live
+
+- **Gallery / landing:** <https://cseperkepapp.github.io/Visualizations/>
+- **Lesson 1 — the lesson (article + embedded figures):** <https://cseperkepapp.github.io/Visualizations/VectorField-Visualizations/lesson-1-vector-landscapes/lesson-1.html>
+- **Figures (open standalone / full screen):**
+  - Terrain vs. dice (2D) — <https://cseperkepapp.github.io/Visualizations/VectorField-Visualizations/lesson-1-vector-landscapes/figures/terrain-vs-dice.html>
+  - Springs & the die (3D) — <https://cseperkepapp.github.io/Visualizations/VectorField-Visualizations/lesson-1-vector-landscapes/figures/springs-and-die-3d.html>
+- **Published article:** <https://pappcseperke.hu/understanding-vector-landscapes-lesson-1/>
+
+To embed a figure in WordPress, see
+[lesson-1-vector-landscapes/WP-EMBED-SNIPPETS.md](VectorField-Visualizations/lesson-1-vector-landscapes/WP-EMBED-SNIPPETS.md).
 
 ---
 

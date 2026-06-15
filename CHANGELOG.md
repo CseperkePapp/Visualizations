@@ -7,6 +7,15 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.20.0] - 2026-06-15
+
+### Added in 1.20.0
+
+- **"⛶ Full screen" button** in both figures' controls — opens the figure's own URL in a new
+  tab (works standalone and when embedded in an iframe, since the iframe's URL is the figure).
+  Regenerated the single-file 3D embed build. EMBEDDING.md's WP snippet now also includes an
+  "Open full screen ↗" figcaption link and `allow="fullscreen"` on the iframe.
+
 ## [1.19.0] - 2026-06-15
 
 ### Added in 1.19.0

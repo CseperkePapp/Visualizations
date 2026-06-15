@@ -46,11 +46,16 @@ paste, replacing the URL:
 ```html
 <figure style="margin:2.5rem 0;">
   <iframe src="https://<user>.github.io/<repo>/.../figures/springs-and-die-3d.html"
-          loading="lazy" title="Vector landscape — springs, die, and the chosen path"
+          loading="lazy" allow="fullscreen" title="Vector landscape — springs, die, and the chosen path"
           style="width:100%;height:640px;border:0;background:#1c1c1c;border-radius:10px;display:block;"></iframe>
+  <figcaption style="text-align:right;font-size:.85rem;margin-top:.4rem;">
+    <a href="https://<user>.github.io/<repo>/.../figures/springs-and-die-3d.html" target="_blank" rel="noopener" style="color:#5ab4c5;">Open full screen ↗</a>
+  </figcaption>
 </figure>
 ```
 
+- Each figure also has its own **"⛶ Full screen"** button in its controls (opens itself in a
+  new tab), so the link works even without the figcaption above.
 - The figure background is `#1c1c1c`, matching the page, so the iframe edge is invisible.
 - `height:640px` suits the 3D scene; the 2D figure reads well around `520px`. Drop to
   ~`460px` on mobile via a media query if needed.

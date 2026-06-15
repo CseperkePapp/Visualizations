@@ -32,6 +32,7 @@
     <button id="replay">Replay</button>
     <button id="pause">Pause</button>
     <label class="temp" title="Temperature: how many roads-not-taken light up before the die picks">🌡<input id="temp" type="range" min="0" max="1.5" step="0.01" value="0.7"><span id="tempVal">0.70</span></label>
+    <button id="full" title="Open full screen in a new tab">⛶ Full screen</button>
     <span class="hint">lit = chosen · grey = possible · ◎ = both versions pass here</span>
   </div>
 </div>
@@ -333,6 +334,7 @@ document.getElementById('v2').onclick=()=>setRun(2);
 document.getElementById('replay').onclick=()=>{start=performance.now();if(paused){paused=false;document.getElementById('pause').textContent='Pause';requestAnimationFrame(loop);}};
 document.getElementById('pause').onclick=e=>{paused=!paused;e.target.textContent=paused?'Play':'Pause';if(!paused){start=performance.now()-pauseT;requestAnimationFrame(loop);}else pauseT=performance.now()-start;};
 document.getElementById('temp').addEventListener('input',e=>{temp=parseFloat(e.target.value);document.getElementById('tempVal').textContent=temp.toFixed(2);});
+document.getElementById('full').addEventListener('click',()=>window.open(location.href,'_blank','noopener'));
 canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top;});
 canvas.addEventListener('mouseleave',()=>{mx=-999;my=-999;});
 window.addEventListener('resize',resize);

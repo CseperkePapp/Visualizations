@@ -1,21 +1,33 @@
-MIT License
+Visualizations — Licensing
+Copyright (c) 2026 Cseperke Papp (Papp Cseperke EV)
 
-Copyright (c) 2026 Cseperke Papp
+This repository contains interactive visualizations. Different parts are
+licensed differently, on purpose. Use whichever license matches the part
+you are reusing.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. CODE  — the reusable machinery:
+   rendering engines, interaction logic, layout/animation code, build
+   scripts, and other general-purpose source.
+   License: MIT  —  see LICENSES/MIT.txt
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+2. CONTENT, DATA & DESIGN — the authored, curated work:
+   the selection, arrangement and editing of data; written copy; color
+   palettes; typography; and visual composition.
+   License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+   see LICENSES/CC-BY-4.0.txt  ·  https://creativecommons.org/licenses/by/4.0/
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+PRECEDENCE — most specific wins:
+   a per-file header   overrides   a per-folder LICENSE   overrides   this file.
+   Unless a folder or file states otherwise, the rule above applies across the
+   whole repository, including visualization types added in the future.
+
+ATTRIBUTION
+   When reusing CONTENT, DATA or DESIGN under CC BY 4.0, credit as:
+     "Cseperke Papp — https://pappcseperke.hu"
+   and link to https://creativecommons.org/licenses/by/4.0/ .
+   MIT-licensed code must retain the copyright and permission notice.
+
+NO WARRANTY
+   Everything here is provided "as is", without warranty of any kind.
+
+Support this work: https://github.com/sponsors/CseperkePapp

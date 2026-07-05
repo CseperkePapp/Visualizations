@@ -17,3 +17,6 @@ pnpm-debug.log*
 # Environment
 .env
 .env.local
+
+# Local inbox (not tracked)
+INBOX/

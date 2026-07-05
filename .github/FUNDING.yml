@@ -1,0 +1,4 @@
+# Renders the "Sponsor" button on this repo.
+# Requires GitHub Sponsors to be set up for the account (Hungary is supported).
+github: [CseperkePapp]
+# custom: ["https://pappcseperke.hu"]

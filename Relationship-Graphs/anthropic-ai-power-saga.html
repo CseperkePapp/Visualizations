@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<!--
+  Everyone's Investor, Everyone's Rival — How Anthropic Ended Up Surrounded
+  (c) 2026 Cseperke Papp  ·  built with AI assistance
+
+  Dual-licensed:
+    - Code (rendering engine + interaction logic): MIT
+    - Content, data & design (curation, copy, palette, composition): CC BY 4.0
+
+  Reuse the engine (MIT) freely. If you reuse or adapt the content, data or
+  design, credit "Cseperke Papp — https://pappcseperke.hu" and link CC BY 4.0.
+  Full terms: https://github.com/CseperkePapp/Visualizations/blob/main/LICENSE
+  Support:    https://github.com/sponsors/CseperkePapp
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Everyone's Investor, Everyone's Rival — How Anthropic Ended Up Surrounded</title>
+<style>
+:root{
+ --bg:#faf9f7;
+ --color-background-primary:#ffffff;
+ --color-border-secondary:rgba(20,20,18,0.28);
+ --color-border-tertiary:rgba(20,20,18,0.14);
+ --color-text-primary:#1d1d1b;
+ --color-text-secondary:#56554e;
+ --color-text-tertiary:#8a887f;
+ --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--color-text-primary);font-family:var(--font-sans);line-height:1.7;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:780px;margin:0 auto;padding:56px 22px 80px;}
+.kicker{font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#0F6E56;font-weight:600;margin:0 0 14px;}
+h1{font-size:38px;line-height:1.15;font-weight:600;margin:0 0 18px;letter-spacing:-0.01em;}
+.dek{font-size:19px;line-height:1.5;color:var(--color-text-secondary);margin:0 0 22px;}
+.byline{font-size:13px;color:var(--color-text-tertiary);border-top:1px solid var(--color-border-tertiary);border-bottom:1px solid var(--color-border-tertiary);padding:12px 0;margin:0 0 34px;}
+h2{font-size:25px;font-weight:600;line-height:1.25;margin:46px 0 8px;letter-spacing:-0.01em;}
+h2 .sub{display:block;font-size:14px;font-weight:400;color:var(--color-text-tertiary);margin-top:4px;letter-spacing:0;}
+p{font-size:17px;margin:0 0 18px;}
+a{color:#0F6E56;text-decoration:none;border-bottom:1px solid rgba(15,110,86,0.3);}
+a:hover{border-bottom-color:#0F6E56;}
+.lead{font-size:18px;}
+.note{background:#fff;border:1px solid var(--color-border-tertiary);border-left:3px solid #BA7517;border-radius:0 8px 8px 0;padding:16px 18px;margin:26px 0;font-size:15px;color:var(--color-text-secondary);}
+.note b{color:var(--color-text-primary);font-weight:600;}
+figure{margin:30px 0;}
+figcaption{font-size:13px;color:var(--color-text-tertiary);margin-top:10px;text-align:center;}
+.srcbox{margin:14px 6px 0;font-size:12.5px;line-height:1.5;}
+.srcbox .lbl{color:var(--color-text-tertiary);font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.srcbox a{color:#0F6E56;border-bottom:1px solid rgba(15,110,86,.3);}
+.srcbox .item{margin-bottom:4px;color:var(--color-text-secondary);}
+.srcbox .note{color:var(--color-text-tertiary);font-style:italic;}
+#nodesrc{border-top:1px solid var(--color-border-tertiary);padding-top:12px;margin-top:14px;}
+#nodesrc.hidden{display:none;}
+.hero{margin:4px 0 38px;}
+.hero svg{display:block;width:100%;height:auto;border-radius:16px;border:1px solid var(--color-border-tertiary);}
+
+/* swimlane */
+.swim-scroll{overflow-x:auto;border:1px solid var(--color-border-tertiary);border-radius:12px;background:#fff;padding:14px;}
+.swim{display:grid;grid-template-columns:108px repeat(4,minmax(132px,1fr));gap:6px;min-width:680px;font-size:12px;}
+.swim .erahd{font-size:12px;color:var(--color-text-secondary);padding:4px 2px;border-bottom:2px solid var(--color-border-secondary);}
+.swim .erahd span{color:var(--color-text-tertiary);}
+.swim .lane{padding:6px 8px;font-weight:600;font-size:13px;display:flex;align-items:center;}
+.swim .cell{padding:7px 8px;border:1px solid var(--color-border-tertiary);border-radius:7px;color:var(--color-text-secondary);line-height:1.5;}
+.swim .cell b{color:var(--color-text-primary);font-weight:600;}
+.swim .faint{color:var(--color-text-tertiary);}
+
+/* interactive web */
+.webcard{background:#fff;border:1px solid var(--color-border-tertiary);border-radius:14px;padding:14px 16px 20px;}
+.rail{display:flex;justify-content:space-between;position:relative;margin:16px 6px 0;}
+.rail::before{content:"";position:absolute;left:14px;right:14px;top:7px;height:2px;background:var(--color-border-tertiary);}
+.tlbtn{appearance:none;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;z-index:1;font-family:var(--font-sans);}
+.tlbtn .dot{width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--color-border-secondary);transition:all .15s;}
+.tlbtn .lbl{font-size:11px;color:var(--color-text-tertiary);white-space:nowrap;}
+.tlbtn.on .dot{background:#0F6E56;border-color:#0F6E56;}
+.tlbtn.on .lbl{color:var(--color-text-primary);font-weight:600;}
+.tlbtn:hover .dot{border-color:#0F6E56;}
+#cap{margin:18px 6px 0;font-size:14.5px;line-height:1.6;color:var(--color-text-secondary);min-height:48px;}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:16px 6px 0;padding-top:13px;border-top:1px solid var(--color-border-tertiary);font-size:12px;color:var(--color-text-secondary);}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.legend i{width:9px;height:9px;border-radius:50%;display:inline-block;}
+text.th{font-family:var(--font-sans);font-size:14px;font-weight:500;fill:var(--color-text-primary);}
+text.ts{font-family:var(--font-sans);font-size:12px;fill:var(--color-text-secondary);}
+.srcs{font-size:14px;line-height:1.5;}
+.srcs li{margin-bottom:9px;}
+footer{margin-top:50px;padding-top:18px;border-top:1px solid var(--color-border-tertiary);font-size:13px;color:var(--color-text-tertiary);}
+@media(max-width:560px){h1{font-size:30px;}.dek{font-size:17px;}h2{font-size:21px;}p{font-size:16px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<p class="kicker">Anatomy of a takedown</p>
+<h1>Everyone's investor, everyone's rival: how Anthropic ended up surrounded</h1>
+<p class="dek">In barely 72 hours this June, the U.S. government pulled Anthropic's most powerful AI model off the market. To see why, you have to trace a decade of money, compute, and grudges — and the four giants who are bankrolling Anthropic and competing with it at the same time.</p>
+<p class="byline">June 16, 2026 · A reported timeline, with the documented facts and the open questions kept separate.</p>
+
+<figure class="hero">
+<svg viewBox="0 0 1200 500" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Anthropic as a single node ringed by inbound arrows from every direction</title>
+<desc>An abstract illustration: a central Anthropic node surrounded by arrows converging on it in green, blue, purple, gray and red, representing investment, compute, competition and hostile action all at once.</desc>
+<defs><marker id="harrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect x="20" y="20" width="1160" height="460" rx="24" fill="#efece4" stroke="rgba(0,0,0,0.06)"/>
+<text x="54" y="66" font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-size="13" font-weight="600" letter-spacing="2.5" fill="#9a9890">THE AI POWER MAP · 2026</text>
+
+<line x1="600" y1="40" x2="600" y2="95" stroke="#A32D2D" stroke-width="2.5" marker-end="url(#harrow)"/>
+<line x1="947" y1="89" x2="741" y2="185" stroke="#3B6D11" stroke-width="2.5" marker-end="url(#harrow)"/>
+<line x1="1122" y1="196" x2="754" y2="234" stroke="#185FA5" stroke-width="2.5" marker-end="url(#harrow)"/>
+<line x1="1108" y1="322" x2="753" y2="272" stroke="#A32D2D" stroke-width="2.5" marker-end="url(#harrow)"/>
+<line x1="910" y1="422" x2="735" y2="325" stroke="#534AB7" stroke-width="2.5" marker-end="url(#harrow)"/>
+<line x1="600" y1="460" x2="600" y2="405" stroke="#3B6D11" stroke-width="2.5" marker-end="url(#harrow)"/>
+<line x1="253" y1="411" x2="459" y2="315" stroke="#888780" stroke-width="2.5" stroke-dasharray="8 6"/>
+<line x1="92" y1="322" x2="447" y2="272" stroke="#185FA5" stroke-width="2.5" marker-end="url(#harrow)"/>
+<line x1="78" y1="196" x2="446" y2="234" stroke="#3B6D11" stroke-width="2.5" marker-end="url(#harrow)"/>
+<line x1="218" y1="102" x2="456" y2="194" stroke="#A32D2D" stroke-width="2.5" marker-end="url(#harrow)"/>
+<line x1="460" y1="47" x2="512" y2="123" stroke="#888780" stroke-width="2.5" stroke-dasharray="8 6"/>
+<line x1="870" y1="68" x2="728" y2="164" stroke="#534AB7" stroke-width="2.5" marker-end="url(#harrow)"/>
+
+<circle cx="600" cy="40" r="7" fill="#A32D2D"/>
+<circle cx="947" cy="89" r="7" fill="#3B6D11"/>
+<circle cx="1122" cy="196" r="7" fill="#185FA5"/>
+<circle cx="1108" cy="322" r="7" fill="#A32D2D"/>
+<circle cx="910" cy="422" r="7" fill="#534AB7"/>
+<circle cx="600" cy="460" r="7" fill="#3B6D11"/>
+<circle cx="253" cy="411" r="7" fill="#888780"/>
+<circle cx="92" cy="322" r="7" fill="#185FA5"/>
+<circle cx="78" cy="196" r="7" fill="#3B6D11"/>
+<circle cx="218" cy="102" r="7" fill="#A32D2D"/>
+<circle cx="460" cy="47" r="7" fill="#888780"/>
+<circle cx="870" cy="68" r="7" fill="#534AB7"/>
+
+<rect x="470" y="194" width="260" height="112" rx="20" fill="none" stroke="rgba(15,110,86,0.18)" stroke-width="1.5"/>
+<rect x="480" y="204" width="240" height="92" rx="16" fill="#ffffff" stroke="#0F6E56" stroke-width="3"/>
+<text x="600" y="249" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-size="30" font-weight="600" fill="#0F6E56">Anthropic</text>
+<text x="600" y="275" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-size="14" fill="#6b6a62">Claude · Fable · Mythos</text>
+</svg>
+</figure>
+
+<p class="lead">On June 9, Anthropic shipped <b>Fable 5</b>, the public version of its Mythos model and, by its own billing, the most capable AI it had ever released. Three days later it was gone. On June 12, the Commerce Department invoked national-security export controls and gave Anthropic roughly 90 minutes to disable Fable 5 and Mythos 5 — not just abroad, but for every foreign national, including its own employees. Unable to filter cleanly by nationality, Anthropic pulled both models worldwide.</p>
+
+<p>The proximate trigger was a tip: Amazon CEO Andy Jassy told senior administration officials that his researchers had jailbroken Fable 5 to extract restricted cyberattack information. The strange part is that Amazon is Anthropic's single largest investor. To understand how a company's own backer ended up handing the government the lever that shut it down, you have to back up — about a decade.</p>
+
+<h2>A decade in lanes<span class="sub">From the deep-learning takeoff to this week, one row per player.</span></h2>
+<p>Almost everyone in this story traces back to two origin points: DeepMind, which Google bought in 2014, and OpenAI, founded in 2015. Anthropic is an OpenAI spin-off. xAI is Musk leaving OpenAI and starting over. The "rivals" are mostly estranged former colleagues.</p>
+
+<div class="swim-scroll">
+<div class="swim">
+  <div></div>
+  <div class="erahd">2012–2017<br><span>Foundations</span></div>
+  <div class="erahd">2018–2021<br><span>The scaling race</span></div>
+  <div class="erahd">2022–2024<br><span>The gold rush</span></div>
+  <div class="erahd">2025–2026<br><span>The tangle</span></div>
+
+  <div class="lane" style="border-left:4px solid #0F6E56;color:#0F6E56;">Anthropic</div>
+  <div class="cell faint">Founders still at Google Brain &amp; OpenAI</div>
+  <div class="cell"><b>2021</b> — Dario &amp; Daniela Amodei + ex-OpenAI staff found Anthropic</div>
+  <div class="cell"><b>2023</b> — Claude launches; takes Google &amp; Amazon billions. <b>2024</b> — Claude 3</div>
+  <div class="cell" style="border-color:#0F6E56;background:rgba(15,110,86,0.05);"><b>2026</b> — $30B raise, $350B value; ships Fable 5; pulled by govt; sues Pentagon &amp; wins</div>
+
+  <div class="lane" style="border-left:4px solid #993556;color:#993556;">OpenAI / Microsoft</div>
+  <div class="cell"><b>2015</b> — OpenAI founded by Altman, Musk &amp; others</div>
+  <div class="cell"><b>2019</b> — Microsoft puts in $1B. <b>2020</b> — GPT-3</div>
+  <div class="cell"><b>2022</b> — ChatGPT. <b>2023</b> — MSFT ~$13B; Altman ousted &amp; reinstated</div>
+  <div class="cell"><b>2026</b> — MSFT adds Claude to Copilot; OpenAI's $50B AWS deal strains the marriage</div>
+
+  <div class="lane" style="border-left:4px solid #185FA5;color:#185FA5;">Google / DeepMind</div>
+  <div class="cell"><b>2014</b> — Google buys DeepMind. <b>2016</b> — AlphaGo. <b>2017</b> — Transformer paper</div>
+  <div class="cell"><b>2020</b> — AlphaFold 2 cracks protein folding</div>
+  <div class="cell"><b>2023</b> — Brain+DeepMind merge; Gemini ships; backs Anthropic. <b>2024</b> — Hassabis Nobel</div>
+  <div class="cell"><b>2026</b> — commits up to $40B to Anthropic (~14%) while Gemini competes</div>
+
+  <div class="lane" style="border-left:4px solid #BA7517;color:#BA7517;">Amazon</div>
+  <div class="cell faint">Alexa &amp; early AWS AI services</div>
+  <div class="cell faint">AWS machine-learning buildout</div>
+  <div class="cell"><b>2023</b> — invests up to $4B in Anthropic. <b>2024</b> — doubles to ~$8B</div>
+  <div class="cell" style="border-color:#BA7517;background:rgba(186,117,23,0.05);"><b>2026</b> — biggest backer, yet CEO Jassy tips the White House to a Fable 5 jailbreak → ban</div>
+
+  <div class="lane" style="border-left:4px solid #534AB7;color:#534AB7;">Musk / xAI</div>
+  <div class="cell"><b>2015</b> — co-founds OpenAI</div>
+  <div class="cell"><b>2018</b> — leaves OpenAI board</div>
+  <div class="cell"><b>2023</b> — founds xAI, launches Grok. <b>2024</b> — sues OpenAI</div>
+  <div class="cell"><b>2026</b> — calls Anthropic "evil," then rents it SpaceX's data center (~$4B); xAI wound down</div>
+
+  <div class="lane" style="border-left:4px solid #A32D2D;color:#A32D2D;">US government</div>
+  <div class="cell faint">Largely hands-off</div>
+  <div class="cell faint">Early AI-policy debate</div>
+  <div class="cell"><b>2023</b> — AI executive order &amp; safety summits</div>
+  <div class="cell" style="border-color:#A32D2D;background:rgba(163,45,45,0.05);"><b>2026</b> — Pentagon demands unrestricted Claude, blacklists it; then export order pulls Fable 5 &amp; Mythos 5</div>
+</div>
+</div>
+<figcaption>The three hyperscalers all converge on Anthropic in 2023 — then diverge sharply in 2026.</figcaption>
+
+<h2>The relationship web, year by year<span class="sub">Move along the timeline to watch the alliances rewire.</span></h2>
+<p>A timeline shows sequence, but it can't show the thing that makes this story strange: who is funding, fighting, supplying, and informing on whom, all at once. Use the dates below the diagram to scrub through time. Each company shows the person in charge at that moment, and every arrow is a single, specific relationship.</p>
+
+<figure>
+<div class="webcard">
+<svg width="100%" viewBox="0 0 680 460" role="img">
+<title>Time-scrubbed relationship web around Anthropic</title>
+<desc>Selecting a date redraws which companies exist, who leads them, and how they invest in, supply compute to, compete with, build on, or act against Anthropic.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<g id="edges"></g>
+<g id="nodes"></g>
+</svg>
+<div class="rail" id="rail"></div>
+<div id="cap"></div>
+<div id="yearsrc" class="srcbox"></div>
+<div class="legend">
+<span><i style="background:#3B6D11;"></i>invests in</span>
+<span><i style="background:#185FA5;"></i>supplies compute</span>
+<span><i style="background:#888780;"></i>competes / origin</span>
+<span><i style="background:#534AB7;"></i>builds on Claude</span>
+<span><i style="background:#A32D2D;"></i>acted against</span>
+</div>
+<div id="nodesrc" class="srcbox hidden"></div>
+</div>
+<figcaption>Interactive: click a year, or click a node to see its sources. Solid arrows flow one direction (money, compute, aggression); dashed gray lines are mutual rivalries or origin ties.</figcaption>
+</figure>
+
+<h2>What the relationship web makes obvious</h2>
+<p>Scrub to June 2026 and every arrow points inward. Anthropic isn't one player among equals — it's the hub everyone is wired into, which is exactly why a single government letter could ripple through the whole structure.</p>
+<p>The contradictions are the point. Amazon, Google, and Microsoft each carry three relationships to Anthropic at once: they invest in it, supply its compute, and either compete with it or build products on it. These aren't allies or rivals; they're both. Amazon is the sharpest case — the only investor that also acted against it, the betrayal at the center of June's story. Google sits in a nearly identical position — investor, compute supplier, and rival through Gemini — but never turned. Same hand, different play.</p>
+<p>And the dependency runs deep enough to be the real vulnerability. By mid-2026, Anthropic is renting compute from Musk's SpaceX, running on Amazon's infrastructure, and sitting on 5 gigawatts of Google TPUs — its three biggest lifelines being a former insulter, the company that just informed on it, and a direct rival. Every Big Tech "AI couple" has effectively gone polyamorous: Microsoft drifts from OpenAI toward Claude; OpenAI signs a $50B deal with Amazon; Google funds the lab its own Gemini is trying to beat.</p>
+
+<div class="note">
+<b>What's documented, and what's inferred.</b> The events above are sourced: the investments, the compute deals, the competition, Amazon's tip-off, and the government's actions all come from public reporting. What the reporting does <i>not</i> establish is motive. It's tempting to read the June takedown as payback for Anthropic's February refusal to drop its safety limits for the Pentagon — and the two threads may well reinforce each other — but no source proves the suspension was retaliation, or that Amazon's motive was anything beyond the stated security concern. The structure is real; the "it's all one war" reading is a hypothesis laid over it. The biggest genuine open question: why Amazon moved against a company it has invested billions in.
+</div>
+
+<h2>Sources</h2>
+<ul class="srcs">
+<li><a href="https://www.anthropic.com/news/fable-mythos-access">Statement on the US government directive to suspend access to Fable 5 and Mythos 5</a> — Anthropic</li>
+<li><a href="https://techcrunch.com/2026/06/13/amazon-ceo-reportedly-raised-anthropic-model-concerns-before-government-crackdown/">Amazon CEO reportedly raised Anthropic model concerns before government crackdown</a> — TechCrunch</li>
+<li><a href="https://fortune.com/2026/06/14/how-a-warning-from-amazon-led-the-white-house-to-shut-down-anthropics-mythos-model/">How a warning from Amazon led the White House to shut down Anthropic's Mythos model</a> — Fortune</li>
+<li><a href="https://www.axios.com/2026/06/13/anthropic-amazon-white-house">How Amazon and the White House ended Anthropic's Fable</a> — Axios</li>
+<li><a href="https://techcrunch.com/2026/06/12/anthropics-safety-warnings-may-have-just-backfired-the-government-has-pulled-the-plug-on-its-most-powerful-ai/">Anthropic's safety warnings may have just backfired</a> — TechCrunch</li>
+<li><a href="https://www.washingtonpost.com/technology/2026/02/26/anthropic-pentagon-rejects-demand-claude/">Anthropic rejects Pentagon terms for lethal use of its chatbot Claude</a> — Washington Post</li>
+<li><a href="https://edition.cnn.com/2026/03/26/business/anthropic-pentagon-injunction-supply-chain-risk">Judge blocks Pentagon's effort to "punish" Anthropic</a> — CNN Business</li>
+<li><a href="https://www.techpolicy.press/a-timeline-of-the-anthropic-pentagon-dispute/">A Timeline of the Anthropic-Pentagon Dispute</a> — Tech Policy Press</li>
+<li><a href="https://www.cnbc.com/2026/04/24/google-to-invest-up-to-40-billion-in-anthropic-as-search-giant-spreads-its-ai-bets.html">Google to invest up to $40 billion in Anthropic</a> — CNBC</li>
+<li><a href="https://fortune.com/2026/05/07/spacex-anthropic-deal-elon-musk-ai-landlord-evil/">Elon Musk called Anthropic 'evil' 3 months ago. Now he's taking $4 billion to become its landlord</a> — Fortune</li>
+<li><a href="https://winbuzzer.com/2026/03/10/microsoft-copilot-cowork-anthropic-claude-m365-agent-xcxwbn/">Microsoft launches Copilot Cowork, powered by Anthropic's Claude</a> — WinBuzzer</li>
+<li><a href="https://fortune.com/2026/06/04/amazon-google-billions-anthropic-ipo/">Amazon and Google have billions riding on Anthropic. The IPO will finally reveal how much</a> — Fortune</li>
+</ul>
+
+<footer>
+Built from public reporting as of June 16, 2026. Relationships shown are documented; motives are left as open questions where the evidence doesn't settle them.
+</footer>
+
+</div>
+<script>
+(function(){
+var P={
+ anthropic:{x:340,y:250,w:148,h:52,label:"Anthropic",name:"Dario Amodei"},
+ gov:{x:340,y:74,w:148,h:44,label:"US government",name:"Trump admin"},
+ amazon:{x:556,y:166,w:128,h:44,label:"Amazon",name:"Andy Jassy"},
+ google:{x:556,y:336,w:132,h:44,label:"Google",name:"Pichai · Hassabis"},
+ microsoft:{x:340,y:422,w:128,h:44,label:"Microsoft",name:"Satya Nadella"},
+ openai:{x:124,y:336,w:128,h:44,label:"OpenAI",name:"Sam Altman"},
+ musk:{x:124,y:166,w:128,h:44,label:"Elon Musk",name:"pre-xAI"}
+};
+for(var k in P){P[k].hw=P[k].w/2;P[k].hh=P[k].h/2;}
+var T={
+ invests:{c:"#3B6D11",arrow:true,dash:""},
+ compute:{c:"#185FA5",arrow:true,dash:""},
+ competes:{c:"#888780",arrow:false,dash:"5 4"},
+ builds:{c:"#534AB7",arrow:true,dash:""},
+ hostile:{c:"#A32D2D",arrow:true,dash:""},
+ origin:{c:"#888780",arrow:false,dash:"4 3"}
+};
+var S=[
+ {d:"2015",on:["openai","musk"],e:[["musk","openai","origin"]],
+  nm:{openai:{n:"Altman · Musk"},musk:{l:"Elon Musk",n:"OpenAI co-founder"}},
+  cap:"Dec 2015 — Musk and Altman co-found OpenAI as a nonprofit. None of today's rivalries exist yet, and Anthropic is years away."},
+ {d:"2019",on:["openai","musk","microsoft"],e:[["microsoft","openai","invests"],["musk","openai","origin"]],
+  nm:{openai:{n:"Sam Altman"},musk:{l:"Elon Musk",n:"left OpenAI, 2018"}},
+  cap:"2019 — Altman takes the OpenAI CEO seat; Nadella's Microsoft puts in $1B. Musk has already walked. Still no Anthropic."},
+ {d:"2021",on:["anthropic","openai","musk","microsoft"],e:[["microsoft","openai","invests"],["openai","anthropic","origin"]],
+  nm:{musk:{l:"Elon Musk",n:"ex-OpenAI"}},
+  cap:"2021 — The Amodeis and other ex-OpenAI staff break away to found Anthropic, planting the seed of the central rivalry."},
+ {d:"2023",on:["anthropic","openai","musk","microsoft","amazon","google"],e:[["microsoft","openai","invests"],["amazon","anthropic","invests"],["amazon","anthropic","compute"],["google","anthropic","invests"],["openai","anthropic","competes"],["musk","openai","origin"]],
+  nm:{musk:{l:"xAI",n:"Elon Musk"}},
+  cap:"2023 — Gold rush: Amazon and Google pour billions into Anthropic; Claude vs ChatGPT hardens; Musk launches xAI."},
+ {d:"2024",on:["anthropic","openai","musk","microsoft","amazon","google"],e:[["microsoft","openai","invests"],["amazon","anthropic","invests"],["amazon","anthropic","compute"],["google","anthropic","invests"],["google","anthropic","competes"],["openai","anthropic","competes"],["musk","openai","hostile"]],
+  nm:{musk:{l:"xAI",n:"Elon Musk"}},
+  cap:"2024 — Amazon doubles to ~$8B. Musk sues Altman's OpenAI. Hassabis's Gemini squares up against Claude."},
+ {d:"Feb 2026",on:["anthropic","openai","musk","microsoft","amazon","google","gov"],e:[["gov","anthropic","hostile"],["amazon","anthropic","invests"],["amazon","anthropic","compute"],["google","anthropic","invests"],["google","anthropic","competes"],["microsoft","openai","invests"],["openai","anthropic","competes"],["musk","anthropic","hostile"]],
+  nm:{gov:{l:"Pentagon",n:"Hegseth · Trump"},musk:{l:"xAI",n:"Elon Musk"}},
+  cap:"Feb 2026 — Amodei refuses Defense Secretary Hegseth's lethal-use demand and Anthropic is blacklisted. Musk calls it 'evil.'"},
+ {d:"May 2026",on:["anthropic","openai","musk","microsoft","amazon","google","gov"],e:[["google","anthropic","invests"],["google","anthropic","compute"],["google","anthropic","competes"],["microsoft","anthropic","invests"],["microsoft","anthropic","builds"],["microsoft","openai","competes"],["amazon","anthropic","invests"],["amazon","anthropic","compute"],["amazon","openai","compute"],["musk","anthropic","compute"],["openai","anthropic","competes"],["gov","anthropic","hostile"]],
+  nm:{gov:{l:"US government",n:"Trump admin"},musk:{l:"SpaceX",n:"Elon Musk"}},
+  cap:"May 2026 — Alliances scramble: Musk flips to Anthropic's compute landlord via SpaceX, Pichai commits up to $40B, Nadella builds on Claude; Altman signs a $50B AWS deal. (Courts have blocked the Pentagon blacklist.)"},
+ {d:"Jun 2026",on:["anthropic","openai","musk","microsoft","amazon","google","gov"],e:[["google","anthropic","invests"],["google","anthropic","compute"],["google","anthropic","competes"],["microsoft","anthropic","invests"],["microsoft","anthropic","builds"],["microsoft","openai","competes"],["amazon","anthropic","invests"],["amazon","anthropic","compute"],["amazon","anthropic","hostile"],["amazon","openai","compute"],["musk","anthropic","compute"],["openai","anthropic","competes"],["gov","anthropic","hostile"]],
+  nm:{gov:{l:"Commerce Dept",n:"Lutnick · Trump"},musk:{l:"SpaceX",n:"Elon Musk"}},
+  cap:"Jun 2026 — Anthropic ships Fable 5. Jassy's Amazon, its biggest backer, tips off Commerce Secretary Lutnick, who pulls the model in 90 minutes."}
+];
+var GOV_ADMIN=["Obama admin","Trump (1st term)","Biden admin","Biden admin","Biden admin","Hegseth · Trump","Trump admin","Lutnick · Trump"];
+var NS="http://www.w3.org/2000/svg";
+var edgesG=document.getElementById("edges"),nodesG=document.getElementById("nodes"),rail=document.getElementById("rail"),cap=document.getElementById("cap");
+var yearsrc=document.getElementById("yearsrc"),nodesrc=document.getElementById("nodesrc");
+var SOURCES=[
+ {t:"Anthropic — statement on the Fable/Mythos suspension",u:"https://www.anthropic.com/news/fable-mythos-access",yrs:[7],nd:["anthropic","gov","amazon"]},
+ {t:"TechCrunch — Amazon CEO raised model concerns before the crackdown",u:"https://techcrunch.com/2026/06/13/amazon-ceo-reportedly-raised-anthropic-model-concerns-before-government-crackdown/",yrs:[7],nd:["amazon","gov","anthropic"]},
+ {t:"Fortune — how a warning from Amazon shut down Mythos",u:"https://fortune.com/2026/06/14/how-a-warning-from-amazon-led-the-white-house-to-shut-down-anthropics-mythos-model/",yrs:[7],nd:["amazon","gov"]},
+ {t:"Axios — how Amazon and the White House ended Fable",u:"https://www.axios.com/2026/06/13/anthropic-amazon-white-house",yrs:[7],nd:["amazon","gov"]},
+ {t:"TechCrunch — Anthropic's safety warnings may have backfired",u:"https://techcrunch.com/2026/06/12/anthropics-safety-warnings-may-have-just-backfired-the-government-has-pulled-the-plug-on-its-most-powerful-ai/",yrs:[7],nd:["anthropic","gov"]},
+ {t:"CNBC — Anthropic to meet the Trump administration over Mythos",u:"https://www.cnbc.com/2026/06/15/anthropic-mythos-trump-ai.html",yrs:[7],nd:["anthropic","gov"]},
+ {t:"Fortune — Amazon and Google's billions riding on Anthropic",u:"https://fortune.com/2026/06/04/amazon-google-billions-anthropic-ipo/",yrs:[6,7],nd:["amazon","google"]},
+ {t:"Washington Post — Anthropic rejects Pentagon terms for lethal use",u:"https://www.washingtonpost.com/technology/2026/02/26/anthropic-pentagon-rejects-demand-claude/",yrs:[5],nd:["gov","anthropic"]},
+ {t:"Wikipedia — Anthropic–US DoD dispute",u:"https://en.wikipedia.org/wiki/Anthropic%E2%80%93United_States_Department_of_Defense_dispute",yrs:[5,6],nd:["gov","anthropic"]},
+ {t:"Tech Policy Press — timeline of the Anthropic–Pentagon dispute",u:"https://www.techpolicy.press/a-timeline-of-the-anthropic-pentagon-dispute/",yrs:[5,6],nd:["gov","anthropic"]},
+ {t:"CNN — judge blocks the Pentagon's effort to punish Anthropic",u:"https://edition.cnn.com/2026/03/26/business/anthropic-pentagon-injunction-supply-chain-risk",yrs:[6],nd:["gov","anthropic"]},
+ {t:"Fortune — Musk called Anthropic 'evil,' now its landlord",u:"https://fortune.com/2026/05/07/spacex-anthropic-deal-elon-musk-ai-landlord-evil/",yrs:[5,6],nd:["musk"]},
+ {t:"Axios — how Elon grew to love Anthropic (SpaceX compute)",u:"https://www.axios.com/2026/05/07/musk-anthropic-compute-spacex-ai",yrs:[6],nd:["musk"]},
+ {t:"CNBC — Google to invest up to $40B in Anthropic",u:"https://www.cnbc.com/2026/04/24/google-to-invest-up-to-40-billion-in-anthropic-as-search-giant-spreads-its-ai-bets.html",yrs:[6],nd:["google"]},
+ {t:"Bloomberg — Google plans up to $40B into Anthropic",u:"https://www.bloomberg.com/news/articles/2026-04-24/google-plans-to-invest-up-to-40-billion-in-anthropic",yrs:[6],nd:["google"]},
+ {t:"WinBuzzer — Microsoft launches Copilot Cowork on Claude",u:"https://winbuzzer.com/2026/03/10/microsoft-copilot-cowork-anthropic-claude-m365-agent-xcxwbn/",yrs:[6],nd:["microsoft"]},
+ {t:"BNN Bloomberg — Anthropic v. OpenAI: behind the bitter battle",u:"https://www.bnnbloomberg.ca/business/artificial-intelligence/2026/06/11/anthropic-v-openai-behind-the-bitter-battle-for-the-future-of-ai/",yrs:[3,4,7],nd:["openai","anthropic","microsoft"]},
+ {t:"Wikipedia — Claude (language model)",u:"https://en.wikipedia.org/wiki/Claude_(language_model)",yrs:[2,3,4],nd:["anthropic","google","amazon"]}
+];
+function srcList(arr){
+ if(!arr.length)return '<div class="note">Foundational industry history — widely documented; no event-specific reporting tagged to this year.</div>';
+ return arr.map(function(s){return '<div class="item"><a href="'+s.u+'" target="_blank" rel="noopener">'+s.t+'</a></div>';}).join('');
+}
+function renderYearSrc(i){yearsrc.innerHTML='<div class="lbl">Sources · '+S[i].d+'</div>'+srcList(SOURCES.filter(function(s){return s.yrs.indexOf(i)>=0;}));}
+function showNodeSrc(id,label){nodesrc.className="srcbox";nodesrc.innerHTML='<div class="lbl">Sources mentioning '+label+'</div>'+srcList(SOURCES.filter(function(s){return s.nd.indexOf(id)>=0;}));}
+function border(n,tx,ty){var dx=tx-n.x,dy=ty-n.y,ax=Math.abs(dx)||0.001,ay=Math.abs(dy)||0.001,s=Math.min(n.hw/ax,n.hh/ay);return{x:n.x+dx*s,y:n.y+dy*s};}
+function clear(g){while(g.firstChild)g.removeChild(g.firstChild);}
+function el(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
+function render(i){
+ var s=S[i];clear(edgesG);clear(nodesG);
+ var groups={};
+ s.e.forEach(function(ed){var key=[ed[0],ed[1]].sort().join("-");(groups[key]=groups[key]||[]).push(ed);});
+ for(var key in groups){
+  var arr=groups[key],n=arr.length;
+  arr.forEach(function(ed,idx){
+   var A=P[ed[0]],B=P[ed[1]],ty=T[ed[2]];
+   var st=border(A,B.x,B.y),en=border(B,A.x,A.y);
+   var ex=en.x-st.x,ey=en.y-st.y,L=Math.sqrt(ex*ex+ey*ey)||1,ux=ex/L,uy=ey/L,px=-uy,py=ux;
+   var off=(idx-(n-1)/2)*9;
+   var x1=st.x+ux*2+px*off,y1=st.y+uy*2+py*off,x2=en.x-ux*4+px*off,y2=en.y-uy*4+py*off;
+   var ln=el("line",{x1:x1,y1:y1,x2:x2,y2:y2,stroke:ty.c,"stroke-width":1.6});
+   if(ty.dash)ln.setAttribute("stroke-dasharray",ty.dash);
+   if(ty.arrow)ln.setAttribute("marker-end","url(#arrow)");
+   edgesG.appendChild(ln);
+  });
+ }
+ var part={};
+ s.e.forEach(function(ed){part[ed[0]]=1;part[ed[1]]=1;});
+ for(var id in P){
+  var n=P[id],active=!!part[id],isA=id==="anthropic";
+  if(!active&&id!=="gov")continue;
+  var ov=(s.nm&&s.nm[id])||{};
+  var lab=ov.l||n.label,nam=ov.n||(id==="gov"?GOV_ADMIN[i]:n.name);
+  var r=el("rect",{x:n.x-n.hw,y:n.y-n.hh,width:n.w,height:n.h,rx:8,fill:"#ffffff"});
+  if(!active){r.setAttribute("stroke","var(--color-border-tertiary)");r.setAttribute("stroke-dasharray","4 4");r.setAttribute("stroke-width","1");r.setAttribute("opacity","0.6");}
+  else if(isA){r.setAttribute("stroke","#1D9E75");r.setAttribute("stroke-width","2");}
+  else{r.setAttribute("stroke","var(--color-border-secondary)");r.setAttribute("stroke-width","0.6");}
+  (function(nid,nlab){r.style.cursor="pointer";r.addEventListener("click",function(){showNodeSrc(nid,nlab);});})(id,lab);
+  nodesG.appendChild(r);
+  var tx=el("text",{x:n.x,y:n.y-4,"text-anchor":"middle","class":"th"});
+  tx.textContent=lab;
+  if(!active)tx.setAttribute("fill","var(--color-text-tertiary)");
+  else if(isA)tx.setAttribute("fill","#0F6E56");
+  nodesG.appendChild(tx);
+  var nmn=el("text",{x:n.x,y:n.y+13,"text-anchor":"middle","class":"ts"});
+  nmn.textContent=nam;
+  nmn.setAttribute("fill",active?"var(--color-text-secondary)":"var(--color-text-tertiary)");
+  nodesG.appendChild(nmn);
+ }
+ cap.textContent=s.cap;
+ renderYearSrc(i);
+ nodesrc.className="srcbox hidden";nodesrc.innerHTML="";
+ Array.prototype.forEach.call(rail.children,function(b,j){b.className="tlbtn"+(j===i?" on":"");});
+}
+S.forEach(function(s,i){
+ var b=document.createElement("button");b.className="tlbtn";b.setAttribute("aria-label",s.d);
+ b.innerHTML='<span class="dot"></span><span class="lbl">'+s.d+'</span>';
+ b.onclick=function(){render(i);};
+ rail.appendChild(b);
+});
+render(S.length-1);
+})();
+</script>
+
+<!-- License / attribution footer (dual-license apparatus). Additive; page styles untouched. -->
+<style>
+  .pagefoot{border-top:1px solid var(--line,rgba(20,20,18,0.14));margin-top:64px;padding:26px 0 0}
+  .pagefoot .wrap{max-width:var(--maxw,780px);margin:0 auto;padding:0 24px}
+  .pagefoot p{margin:0 0 8px;color:var(--ink-faint,#7a7970);font-size:13px;line-height:1.65}
+  .pagefoot strong{color:var(--ink-soft,#56554e);font-weight:600;font-family:var(--fdisplay,inherit)}
+  .pagefoot a{color:var(--ink-soft,#56554e);text-decoration:none;border-bottom:1px solid var(--line,rgba(20,20,18,0.14))}
+  .pagefoot a:hover{color:var(--red,#A32D2D);border-color:var(--red,#A32D2D)}
+  .pagefoot .sep{color:var(--line,rgba(20,20,18,0.28))}
+</style>
+
+<footer class="pagefoot">
+  <div class="wrap">
+    <p><strong>Everyone's Investor, Everyone's Rival</strong> — designed &amp; curated by
+       <a href="https://pappcseperke.hu">Cseperke Papp</a>, built with AI assistance.</p>
+    <p>&copy; 2026 Cseperke Papp
+       <span class="sep">·</span> code <a href="https://github.com/CseperkePapp/Visualizations/blob/main/LICENSE">MIT</a>,
+       content &amp; design <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+       — reuse freely with credit
+       <span class="sep">·</span> <a href="https://github.com/sponsors/CseperkePapp">Sponsor this work</a></p>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,22 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+SPDX-License-Identifier: CC-BY-4.0
+
+Summary (not a substitute for the license):
+You are free to SHARE (copy and redistribute in any medium or format) and
+ADAPT (remix, transform, build upon) the material for any purpose, even
+commercially, under these terms:
+  • ATTRIBUTION — give appropriate credit, link the license, and indicate if
+    changes were made. Do it reasonably, but not in a way that suggests the
+    licensor endorses you.
+  • NO ADDITIONAL RESTRICTIONS — don't apply legal terms or technological
+    measures that legally restrict others from doing what the license permits.
+
+Canonical, authoritative text (this reference does not replace it):
+  Human-readable summary: https://creativecommons.org/licenses/by/4.0/
+  Full legal code:        https://creativecommons.org/licenses/by/4.0/legalcode
+
+In THIS repository, CC BY 4.0 covers CONTENT, DATA & DESIGN as defined in
+/LICENSE. Code is licensed separately under MIT.
+
+Note: To keep the repo fully self-contained, you may download the official
+full legal code from the URL above and paste it below this line.

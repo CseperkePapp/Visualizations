@@ -1,0 +1,24 @@
+<!-- Reusable page footer. Requires these CSS vars (or swap for your own):
+     --line, --ink-faint, --ink-soft, --red, --fdisplay. Place before </body>. -->
+
+<style>
+  .pagefoot{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 0}
+  .pagefoot .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .pagefoot p{margin:0 0 8px;color:var(--ink-faint);font-size:13px;line-height:1.65}
+  .pagefoot strong{color:var(--ink-soft);font-weight:600;font-family:var(--fdisplay)}
+  .pagefoot a{color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--line)}
+  .pagefoot a:hover{color:var(--red);border-color:var(--red)}
+  .pagefoot .sep{color:var(--line)}
+</style>
+
+<footer class="pagefoot">
+  <div class="wrap">
+    <p><strong>{{TITLE}}</strong> — designed &amp; curated by
+       <a href="{{AUTHOR_URL}}">{{AUTHOR}}</a>, built with AI assistance.</p>
+    <p>&copy; {{YEAR}} {{AUTHOR}}
+       <span class="sep">·</span> code <a href="{{REPO_URL}}/blob/main/LICENSE">MIT</a>,
+       content &amp; design <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+       — reuse freely with credit
+       <span class="sep">·</span> <a href="{{SPONSOR_URL}}">Sponsor this work</a></p>
+  </div>
+</footer>

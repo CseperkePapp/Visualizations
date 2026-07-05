@@ -1,5 +1,18 @@
 <!DOCTYPE html>
 <!--
+  {{TITLE}}
+  (c) {{YEAR}} {{AUTHOR}}  ·  built with AI assistance
+
+  Dual-licensed:
+    - Code (rendering engine + interaction logic): MIT
+    - Content, data & design (curation, copy, palette, composition): CC BY 4.0
+
+  Reuse the engine (MIT) freely. If you reuse or adapt the content, data or
+  design, credit "{{AUTHOR}} — {{AUTHOR_URL}}" and link CC BY 4.0.
+  Full terms: {{REPO_URL}}/blob/main/LICENSE
+  Support:    {{SPONSOR_URL}}
+-->
+<!--
   Educational Visualization Scaffold
   ----------------------------------
   Copy this file into a project folder and rename it, e.g.
@@ -171,5 +184,30 @@ window.addEventListener('resize', resize);
 resize();
 if (reduceMotion) draw(0); else schedule(); // static frame for reduced-motion users
 </script>
+
+<!-- License / attribution footer. Fill the {{PLACEHOLDERS}} when you copy this file.
+     REMOVE this footer if the page will only ever be embedded in an <iframe>
+     (the license comment near the top still applies either way). -->
+<style>
+  .pagefoot{border-top:1px solid var(--line,#2a2a2a);margin-top:64px;padding:26px 0 0}
+  .pagefoot .wrap{max-width:var(--maxw,720px);margin:0 auto;padding:0 20px}
+  .pagefoot p{margin:0 0 8px;color:var(--ink-faint,#8a8a8a);font-size:13px;line-height:1.65}
+  .pagefoot strong{color:var(--ink-soft,#cfcfcf);font-weight:600;font-family:var(--fdisplay,inherit)}
+  .pagefoot a{color:var(--ink-soft,#cfcfcf);text-decoration:none;border-bottom:1px solid var(--line,#2a2a2a)}
+  .pagefoot a:hover{color:var(--red,#54739e);border-color:var(--red,#54739e)}
+  .pagefoot .sep{color:var(--line,#2a2a2a)}
+</style>
+
+<footer class="pagefoot">
+  <div class="wrap">
+    <p><strong>{{TITLE}}</strong> — designed &amp; curated by
+       <a href="{{AUTHOR_URL}}">{{AUTHOR}}</a>, built with AI assistance.</p>
+    <p>&copy; {{YEAR}} {{AUTHOR}}
+       <span class="sep">·</span> code <a href="{{REPO_URL}}/blob/main/LICENSE">MIT</a>,
+       content &amp; design <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+       — reuse freely with credit
+       <span class="sep">·</span> <a href="{{SPONSOR_URL}}">Sponsor this work</a></p>
+  </div>
+</footer>
 </body>
 </html>

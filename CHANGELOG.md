@@ -7,6 +7,26 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.23.0] - 2026-07-05
+
+### Added in 1.23.0
+
+- **Dual-license apparatus.** Root `LICENSE` rewritten as a code-MIT / content-CC-BY-4.0
+  routing file; added `LICENSES/MIT.txt`, `LICENSES/CC-BY-4.0.txt`, `LICENSE.template.md`,
+  `.github/FUNDING.yml` (Sponsors button), and `templates/html-license-header.html` +
+  `templates/html-footer.html`.
+- **Per-page licensing** on standalone pages: license header comment + visible attribution
+  footer on `index.html`, Lesson 1, and the Anthropic power-saga graph; header comment only
+  on the iframe-embedded figures. The scaffold now ships with placeholder header + footer.
+- **`CLAUDE.md`** documenting the dual-license convention so it stays ambient.
+- First-time commit of the **Relationship-Graphs** (Anthropic power saga) and **Timelines**
+  (Michael Jackson) visualizations.
+
+### Changed in 1.23.0
+
+- **README** License section rewritten for dual-licensing; Conventions, Repository Layout,
+  and version/verified date brought up to date.
+
 ## [1.22.0] - 2026-06-15
 
 ### Changed in 1.22.0

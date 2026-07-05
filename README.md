@@ -1,8 +1,8 @@
 # Visualizations
 
 **Type:** Repo overview
-**Version:** 1.22.0
-**Verified:** 2026-06-15
+**Version:** 1.23.0
+**Verified:** 2026-07-05
 
 ---
 
@@ -93,8 +93,13 @@ work (tooling reviews, investigations, decision logs):
 ```text
 Visualizations/
 ├── README.md                         # this file
+├── CLAUDE.md                         # conventions for AI assistants (incl. licensing)
 ├── PROJECT-WORKFLOW-OVERLAYS.md      # this repo's conventions (the deltas)
 ├── CHANGELOG.md
+├── index.html                        # GitHub Pages landing / gallery
+├── LICENSE                           # dual-license routing (code MIT / content CC BY 4.0)
+├── LICENSE.template.md               # copy-to-reuse version of the routing file
+├── LICENSES/                         # MIT.txt + CC-BY-4.0.txt full texts
 ├── VectorField-Visualizations/       # first project — LLMs as a vector landscape
 │   └── lesson-1-vector-landscapes/
 │       ├── article.md                # concept source (canon)
@@ -102,15 +107,22 @@ Visualizations/
 │       ├── FIGURES.md                # section → figure map + accuracy constraints
 │       ├── figures/*.html            # self-contained, individually testable
 │       └── prompts/                  # build prompts for figures
+├── Relationship-Graphs/              # interactive relationship/power-map visualizations
+│   └── anthropic-ai-power-saga.html
+├── Timelines/                        # interactive life/work/lineage timelines
+│   └── michael-jackson/index.html
 ├── templates/
 │   ├── TEMPLATE-VISUALIZATION-SPEC.md
 │   ├── TEMPLATE-TASK-VISUALIZATION.md
 │   ├── TEMPLATE-CONCEPT-ACCURACY-REVIEW.md
 │   ├── scaffold/visualization-scaffold.html
+│   ├── html-license-header.html      # per-page license comment template
+│   ├── html-footer.html              # per-page attribution footer template
 │   ├── starter-packs/                # generic assessment templates
 │   └── TEMPLATE-*.md                 # generic workflow templates
 ├── headers/                          # document header templates
 ├── examples/                         # sample PM surfaces
+├── .github/FUNDING.yml               # GitHub Sponsors button
 └── automation/                       # optional workflow automation kit
 ```
 
@@ -142,6 +154,9 @@ Write the spec first; it makes the build and the accuracy review honest.
   would call wrong. Label where the metaphor breaks down.
 - **Increment the version** in this README and `CHANGELOG.md` when you ship.
 - **Provenance is explicit.** Specs/tasks/reviews record the AI agent and model used.
+- **Dual-licensed, per-page.** Code is MIT, content/design is CC BY 4.0; every standalone
+  page carries a license header comment + visible footer. See the [License](#license)
+  section and [CLAUDE.md](CLAUDE.md).
 
 ---
 
@@ -153,6 +168,19 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-[MIT](LICENSE)
+This repo is **dual-licensed** — use whichever license matches the part you reuse:
+
+- **Code** (rendering engines, interaction logic, build scripts) → **[MIT](LICENSES/MIT.txt)**
+- **Content, data & design** (curation, copy, palette, typography, composition) →
+  **[CC BY 4.0](LICENSES/CC-BY-4.0.txt)**
+
+Precedence, most specific wins: a per-file header > a per-folder `LICENSE` > the root
+**[LICENSE](LICENSE)**. Standalone pages carry a license header comment and a visible
+attribution footer. When reusing content/design under CC BY 4.0, credit
+"Cseperke Papp — https://pappcseperke.hu" and link CC BY 4.0. See
+[LICENSE.template.md](LICENSE.template.md) to reuse this apparatus in another repo, and
+[CLAUDE.md](CLAUDE.md) for the convention AI assistants follow here.
+
+❤️ Support this work: <https://github.com/sponsors/CseperkePapp>
 
 © 2026 Cseperke Papp.

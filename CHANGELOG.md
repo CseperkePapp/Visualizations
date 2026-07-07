@@ -21,11 +21,23 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`CLAUDE.md`** documenting the dual-license convention so it stays ambient.
 - First-time commit of the **Relationship-Graphs** (Anthropic power saga) and **Timelines**
   (Michael Jackson) visualizations.
+- **`docs/`** folder with a `README.md` index; the inherited workflow/meta docs now live there.
 
 ### Changed in 1.23.0
 
+- **Landing gallery** (`index.html`) now lists the Anthropic power-saga graph and the Michael
+  Jackson timeline alongside Lesson 1; footer license label updated to code MIT + content CC BY 4.0.
+- **Repo organization:** moved the 8 inherited workflow/meta docs (`ADOPTION-GUIDE`,
+  `DOCUMENT-TAXONOMY`, `DECISIONS-QUICKSTART`, `TASK-SCOPE-GUIDELINES`, `VAULT-INTEGRATION`,
+  `PROJECT-WORKFLOW-OVERLAYS`, `source-intelligence`, `system-operating-agreement`) into `docs/`,
+  updating all internal links; the repo root is now just README/CHANGELOG/LICENSE(+template)/CLAUDE.
 - **README** License section rewritten for dual-licensing; Conventions, Repository Layout,
   and version/verified date brought up to date.
+
+### Removed in 1.23.0
+
+- Duplicate `Timelines/MJ/mj-lineage-timeline.html` (byte-identical to the canonical
+  `Timelines/michael-jackson/index.html`); its Timelines index README was lifted to `Timelines/README.md`.
 
 ## [1.22.0] - 2026-06-15
 

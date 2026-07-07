@@ -55,7 +55,7 @@ WHAT       HOW             the .html            IS IT RIGHT?
 4. **Accuracy review** — `templates/TEMPLATE-CONCEPT-ACCURACY-REVIEW.md`
    Before publishing: is it scientifically correct and pedagogically clear?
 
-See **[PROJECT-WORKFLOW-OVERLAYS.md](PROJECT-WORKFLOW-OVERLAYS.md)** for this repo's
+See **[docs/PROJECT-WORKFLOW-OVERLAYS.md](docs/PROJECT-WORKFLOW-OVERLAYS.md)** for this repo's
 specific conventions (no build step, browser-only testing, AI attribution).
 
 ---
@@ -83,8 +83,8 @@ work (tooling reviews, investigations, decision logs):
 - `headers/` — standardized document headers
 - `templates/starter-packs/` — copy-ready assessment tasks/prompts (repo review,
   root-cause, SWOT, code QA, AI capability)
-- See [DOCUMENT-TAXONOMY.md](DOCUMENT-TAXONOMY.md) for the six document categories and
-  [ADOPTION-GUIDE.md](ADOPTION-GUIDE.md) for how the kernel works.
+- See [docs/DOCUMENT-TAXONOMY.md](docs/DOCUMENT-TAXONOMY.md) for the six document categories and
+  [docs/ADOPTION-GUIDE.md](docs/ADOPTION-GUIDE.md) for how the kernel works.
 
 ---
 
@@ -94,7 +94,6 @@ work (tooling reviews, investigations, decision logs):
 Visualizations/
 ├── README.md                         # this file
 ├── CLAUDE.md                         # conventions for AI assistants (incl. licensing)
-├── PROJECT-WORKFLOW-OVERLAYS.md      # this repo's conventions (the deltas)
 ├── CHANGELOG.md
 ├── index.html                        # GitHub Pages landing / gallery
 ├── LICENSE                           # dual-license routing (code MIT / content CC BY 4.0)
@@ -122,6 +121,7 @@ Visualizations/
 │   └── TEMPLATE-*.md                 # generic workflow templates
 ├── headers/                          # document header templates
 ├── examples/                         # sample PM surfaces
+├── docs/                             # workflow/meta docs (taxonomy, adoption, overlays, vault, …)
 ├── .github/FUNDING.yml               # GitHub Sponsors button
 └── automation/                       # optional workflow automation kit
 ```

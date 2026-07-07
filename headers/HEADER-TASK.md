@@ -12,7 +12,7 @@ Use this header for **task specifications** - discrete units of work to be done.
 - Documentation tasks
 - Any bounded unit of work
 
-See [TASK-SCOPE-GUIDELINES.md](../TASK-SCOPE-GUIDELINES.md) for guidance on task sizing and parent/subtask relationships.
+See [TASK-SCOPE-GUIDELINES.md](../docs/TASK-SCOPE-GUIDELINES.md) for guidance on task sizing and parent/subtask relationships.
 
 ## Template (Standalone Task)
 

@@ -175,7 +175,7 @@ Recommended workflow naming convention:
 
 ### Optional: add workflow automation
 
-If your project wants mechanical workflow checks, task lifecycle rename/sync scripts, or git hooks, use the isolated automation kit in [automation/README.md](automation/README.md).
+If your project wants mechanical workflow checks, task lifecycle rename/sync scripts, or git hooks, use the isolated automation kit in [automation/README.md](../automation/README.md).
 
 For local adoption from a checked-out template copy, you can also use the installer helpers:
 
@@ -196,7 +196,7 @@ These are portable patterns extracted from real project usage, but kept product-
 
 ### Optional: start from runnable examples
 
-If you prefer a copy-ready starting point instead of creating each PM file manually, use [examples/project-management/README.md](examples/project-management/README.md).
+If you prefer a copy-ready starting point instead of creating each PM file manually, use [examples/project-management/README.md](../examples/project-management/README.md).
 
 The examples include:
 
@@ -204,7 +204,7 @@ The examples include:
 - workflow folder guidance
 - decision folder guidance
 
-If you want a concrete example of the target shape before copying files into your own repo, see [examples/project-management/README.md](examples/project-management/README.md).
+If you want a concrete example of the target shape before copying files into your own repo, see [examples/project-management/README.md](../examples/project-management/README.md).
 
 ### Optional: use assessment starter templates
 

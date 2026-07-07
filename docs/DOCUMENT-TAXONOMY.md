@@ -56,7 +56,7 @@ PROJECT
 | Feature specs (high-level) | Define what a feature should achieve |
 | Project vision docs | Define the overall purpose |
 
-**Header template:** [HEADER-INTENT.md](headers/HEADER-INTENT.md)
+**Header template:** [HEADER-INTENT.md](../headers/HEADER-INTENT.md)
 
 ---
 
@@ -83,7 +83,7 @@ PROJECT
 | CLAUDE.md / AGENTS.md | Authoritative AI collaboration instructions |
 | DEFAULTS.md | Authoritative default values |
 
-**Header template:** [HEADER-CANON.md](headers/HEADER-CANON.md)
+**Header template:** [HEADER-CANON.md](../headers/HEADER-CANON.md)
 
 ---
 
@@ -108,7 +108,7 @@ PROJECT
 | Investigation docs | Deep dives into specific unknowns |
 | "Why does X happen?" docs | Technical mysteries being explored |
 
-**Header template:** [HEADER-QUESTION.md](headers/HEADER-QUESTION.md)
+**Header template:** [HEADER-QUESTION.md](../headers/HEADER-QUESTION.md)
 
 ---
 
@@ -133,7 +133,7 @@ PROJECT
 | Architecture Decision Records (ADRs) | Formal decision documentation |
 | "Why we chose X over Y" docs | Technology/approach choices |
 
-**Header template:** [HEADER-DECISION.md](headers/HEADER-DECISION.md)
+**Header template:** [HEADER-DECISION.md](../headers/HEADER-DECISION.md)
 
 ---
 
@@ -159,7 +159,7 @@ PROJECT
 | A/B test documentation | Comparison experiments |
 | "What if we tried X?" docs | Exploratory work |
 
-**Header template:** [HEADER-EXPERIMENT.md](headers/HEADER-EXPERIMENT.md)
+**Header template:** [HEADER-EXPERIMENT.md](../headers/HEADER-EXPERIMENT.md)
 
 ---
 
@@ -180,11 +180,11 @@ PROJECT
 
 | Sub-type | Purpose | Header |
 | -------- | ------- | ------ |
-| **Task** | Define a unit of work | [HEADER-TASK.md](headers/HEADER-TASK.md) |
-| **Prompt** | Instructions for AI execution | [HEADER-PROMPT.md](headers/HEADER-PROMPT.md) |
-| **Brief** | Structured brief for human execution | [HEADER-BRIEF.md](headers/HEADER-BRIEF.md) |
-| **Report** | Written output from a task run | [HEADER-REPORT.md](headers/HEADER-REPORT.md) |
-| **Workflow** | Reusable recurring process recipe | [HEADER-WORKFLOW.md](headers/HEADER-WORKFLOW.md) |
+| **Task** | Define a unit of work | [HEADER-TASK.md](../headers/HEADER-TASK.md) |
+| **Prompt** | Instructions for AI execution | [HEADER-PROMPT.md](../headers/HEADER-PROMPT.md) |
+| **Brief** | Structured brief for human execution | [HEADER-BRIEF.md](../headers/HEADER-BRIEF.md) |
+| **Report** | Written output from a task run | [HEADER-REPORT.md](../headers/HEADER-REPORT.md) |
+| **Workflow** | Reusable recurring process recipe | [HEADER-WORKFLOW.md](../headers/HEADER-WORKFLOW.md) |
 
 **Examples:**
 

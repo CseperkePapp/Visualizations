@@ -43,3 +43,29 @@ only — never change visualization data, layout, colors, or behavior.
 
 The `apply-licensing` skill (`.claude/skills/apply-licensing/SKILL.md`)
 automates this, plan-first and idempotently.
+
+## WordPress embed convention
+
+Every visualization is meant to be embeddable in a WordPress article, not just
+viewed on GitHub Pages. Don't let that documentation lag behind the build.
+
+**Rule:** whenever a new standalone HTML visualization page is created (or an
+existing one's embed-relevant details change — background color, natural
+content height, `--maxw`, whether it has its own in-page fullscreen control),
+create or update a sibling `WP-EMBED-SNIPPETS.md` in the same folder, built from
+`templates/TEMPLATE-WP-EMBED-SNIPPETS.md`. One `WP-EMBED-SNIPPETS.md` per folder
+is fine if that folder holds several related, individually-embeddable pages
+(e.g. a lesson's `figures/`) — add a new `##` section per page rather than a new file.
+
+Each snippet must be filled in from the actual page, not guessed:
+- `{{BG_HEX}}` — read the page's own `:root{--bg:...}` so the iframe edge is invisible.
+- `{{HEIGHT_PX}}` — the page's natural content height; note if it's fixed-viewport
+  vs. variable (e.g. depends on filter/zoom state).
+- Whether the page has its own fullscreen control — if not, the snippet's
+  "Open full screen ↗" figcaption link is load-bearing; keep it.
+
+**Skip:** fragments/partials, generated/`.embed` builds, and pages that only ever
+render inside another page's `<iframe>` and are never meant to be embedded directly
+in an external article (e.g. a lesson's own published page, which already embeds
+its figures — the figures get the snippet, the lesson page doesn't need one for itself
+unless it's also meant to be dropped into WP as a whole).

@@ -1,8 +1,8 @@
 # Visualizations
 
 **Type:** Repo overview
-**Version:** 1.23.0
-**Verified:** 2026-07-05
+**Version:** 1.24.0
+**Verified:** 2026-07-08
 
 ---
 
@@ -71,6 +71,7 @@ specific conventions (no build step, browser-only testing, AI attribution).
 | [TEMPLATE-CONCEPT-ACCURACY-REVIEW.md](templates/TEMPLATE-CONCEPT-ACCURACY-REVIEW.md) | Check correctness + clarity before publishing |
 | [scaffold/visualization-scaffold.html](templates/scaffold/visualization-scaffold.html) | Copy-ready HTML/canvas starter |
 | [TEMPLATE-WORDPRESS-ARTICLE.md](templates/TEMPLATE-WORDPRESS-ARTICLE.md) | Convert a lesson `article.md` into WordPress/Elementor HTML (design-system classes, `#1c1c1c`, figure embeds) |
+| [TEMPLATE-WP-EMBED-SNIPPETS.md](templates/TEMPLATE-WP-EMBED-SNIPPETS.md) | Copy-paste `<iframe>` embed block for dropping any standalone visualization page into a WordPress article — created for every new page (see [CLAUDE.md](CLAUDE.md)) |
 
 ### General workflow kernel (inherited, still available)
 

@@ -111,6 +111,7 @@ Record what was actually checked before closing the task.
 - [ ] Spec `Status` updated (→ `built` / `published`)
 - [ ] Concept-accuracy review passed (or follow-up task filed)
 - [ ] `CHANGELOG.md` updated if a published visualization changed
+- [ ] Folder's `WP-EMBED-SNIPPETS.md` created/updated from `templates/TEMPLATE-WP-EMBED-SNIPPETS.md`
 - [ ] This task file: `Status`, `Completed`, verification notes filled
 
 ---

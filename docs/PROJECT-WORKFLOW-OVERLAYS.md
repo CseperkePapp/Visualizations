@@ -31,6 +31,10 @@ first project is `VectorField-Visualizations/`. Each project is a folder of rela
 2. File a build task from `templates/TEMPLATE-TASK-VISUALIZATION.md`.
 3. Copy `templates/scaffold/visualization-scaffold.html` into the project folder and build.
 4. Run a `templates/TEMPLATE-CONCEPT-ACCURACY-REVIEW.md` before publishing.
+5. Create or update the folder's `WP-EMBED-SNIPPETS.md` from
+   `templates/TEMPLATE-WP-EMBED-SNIPPETS.md` — every standalone HTML page gets a
+   ready-to-paste WordPress embed block. See the "WordPress embed convention" in
+   the root `CLAUDE.md`.
 
 ---
 
@@ -104,6 +108,7 @@ Visualization-domain templates added on top of the kernel:
 | `templates/TEMPLATE-TASK-VISUALIZATION.md` | Build-an-animation task with viz quality bars | When building/ shipping a visualization |
 | `templates/TEMPLATE-CONCEPT-ACCURACY-REVIEW.md` | Check scientific/conceptual correctness and clarity | Before publishing; after major changes |
 | `templates/scaffold/visualization-scaffold.html` | Dependency-free starter (dark theme, canvas, DPR, rAF, reduced-motion) | Copy as the seed for a new `.html` |
+| `templates/TEMPLATE-WP-EMBED-SNIPPETS.md` | Copy-paste WordPress `<iframe>` embed block(s) | Every time a standalone HTML page is created or its embed details change |
 
 The generic kernel templates (`TEMPLATE-TASK.md`, `TEMPLATE-REPORT.md`, starter-pack
 assessments) remain available for non-visualization work like tooling reviews.

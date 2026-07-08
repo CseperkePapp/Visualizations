@@ -7,6 +7,21 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.24.0] - 2026-07-08
+
+### Added in 1.24.0
+
+- **`templates/TEMPLATE-WP-EMBED-SNIPPETS.md`** — copy-ready skeleton for a per-page
+  WordPress `<iframe>` embed doc (styled block, figcaption fullscreen link, background/height/maxw notes).
+- **WordPress embed convention** documented in `CLAUDE.md`: every standalone HTML
+  visualization page gets a sibling `WP-EMBED-SNIPPETS.md`, created/updated whenever the
+  page's embed-relevant details (background, height, fullscreen control) change.
+- Wired the convention into `docs/PROJECT-WORKFLOW-OVERLAYS.md` (authoring flow step 5 +
+  templates table) and `templates/TEMPLATE-TASK-VISUALIZATION.md` (closeout checklist).
+- Backfilled `Relationship-Graphs/WP-EMBED-SNIPPETS.md` and
+  `Timelines/michael-jackson/WP-EMBED-SNIPPETS.md` for the two standalone pages that
+  predated the convention.
+
 ## [1.23.0] - 2026-07-05
 
 ### Added in 1.23.0
